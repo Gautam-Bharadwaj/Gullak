@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IndianRupee, TrendingDown, Calendar, Wallet, Zap, Brain, ChevronRight, AlertCircle, CheckCircle2, Info, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useDebtCalculator } from '../hooks/useDebtCalculator';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
@@ -22,13 +23,25 @@ const DebtOptimizer = () => {
         return saved ? Number(saved) : 5000;
     });
 
+    const [income, setIncome] = useState(() => {
+        const saved = localStorage.getItem('gullak_debt_income');
+        return saved ? Number(saved) : 50000;
+    });
+
+    const [livingExpenses, setLivingExpenses] = useState(() => {
+        const saved = localStorage.getItem('gullak_debt_expenses');
+        return saved ? Number(saved) : 15000;
+    });
+
     const [isExporting, setIsExporting] = useState(false);
     const contentRef = useRef(null);
 
     useEffect(() => {
         localStorage.setItem('gullak_debt_emis', JSON.stringify(emis));
         localStorage.setItem('gullak_debt_extra', extraPayment.toString());
-    }, [emis, extraPayment]);
+        localStorage.setItem('gullak_debt_income', income.toString());
+        localStorage.setItem('gullak_debt_expenses', livingExpenses.toString());
+    }, [emis, extraPayment, income, livingExpenses]);
 
     const updateEmi = (id, field, value) => {
         setEmis(emis.map(e => e.id === id ? { ...e, [field]: field === 'name' ? value : (Number(value) || 0) } : e));
