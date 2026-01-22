@@ -15,26 +15,25 @@ const Insights = () => {
             try {
                 // Try backend first
                 const res = await fetch('/api/expenses');
-                const backendData = await res.json();
-
-                if (backendData && backendData.expenses) {
-                    setData(backendData);
+                if (res.ok) {
+                    const backendData = await res.json();
+                    if (backendData && backendData.expenses) {
+                        setData(backendData);
+                    }
                 } else {
-                    // Fallback to localStorage
-                    const savedEx = localStorage.getItem('gullak_expenses');
-                    const savedInc = localStorage.getItem('gullak_income');
-                    if (savedEx) setData({
-                        expenses: JSON.parse(savedEx),
-                        income: Number(savedInc) || 50000
-                    });
+                    throw new Error('Backend offline or error');
                 }
-
+            } catch (error) {
+                console.log("Backend offline, using localStorage");
+                const savedEx = localStorage.getItem('gullak_expenses');
+                const savedInc = localStorage.getItem('gullak_income');
+                if (savedEx) setData({
+                    expenses: JSON.parse(savedEx),
+                    income: Number(savedInc) || 50000
+                });
+            } finally {
                 const savedDebts = localStorage.getItem('gullak_debt_emis');
                 if (savedDebts) setDebtData(JSON.parse(savedDebts));
-
-            } catch (error) {
-                console.error("Fetch failed", error);
-            } finally {
                 setLoading(false);
             }
         };

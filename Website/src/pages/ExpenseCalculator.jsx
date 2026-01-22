@@ -53,15 +53,16 @@ const ExpenseCalculator = () => {
         return () => clearTimeout(timeoutId);
     }, [expenses, income]);
 
-    // Initial load from backend
     useEffect(() => {
         const fetchExpenses = async () => {
             try {
                 const res = await fetch('/api/expenses');
-                const data = await res.json();
-                if (data && data.expenses) {
-                    setExpenses(data.expenses);
-                    setIncome(data.income);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.expenses) {
+                        setExpenses(data.expenses);
+                        setIncome(data.income);
+                    }
                 }
             } catch (error) {
                 console.log('Failed to fetch from backend, using localStorage');
