@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, Shield, Target, IndianRupee, AlertTriangle, CheckCircle2, ArrowUpRight, Zap, Calculator } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import FinancialHealthScore from '../components/FinancialHealthScore';
+
 
 const Insights = () => {
     const [data, setData] = useState({ expenses: [], income: 0 });
@@ -83,36 +85,11 @@ const Insights = () => {
         <div className="pt-28 pb-16 min-h-screen bg-background text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-                {/* Header Section */}
-                <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                    <div>
-                        <motion.div
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black mb-4 tracking-widest uppercase"
-                        >
-                            <Brain size={14} />
-                            <span>Financial AI Analysis</span>
-                        </motion.div>
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tight">
-                            Personal <span className="text-gradient">Insights</span>
-                        </h1>
-                        <p className="text-gray-400 mt-4 max-w-xl text-lg">
-                            Your financial health score and AI-driven recommendations based on your real-time data.
-                        </p>
-                    </div>
-
-                    <div className="glass p-6 rounded-[2rem] border-primary/20 bg-primary/5 flex items-center gap-6">
-                        <div className="text-right">
-                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest block mb-1">Health Score</span>
-                            <span className="text-5xl font-black text-white">{metrics.score}</span>
-                        </div>
-                        <div className="w-px h-12 bg-white/10"></div>
-                        <div className={`p-4 rounded-2xl ${metrics.score > 70 ? 'bg-secondary/20 text-secondary' : 'bg-orange-500/20 text-orange-400'}`}>
-                            {metrics.score > 70 ? <CheckCircle2 size={32} /> : <AlertTriangle size={32} />}
-                        </div>
-                    </div>
+                {/* Health Score Section */}
+                <div className="mb-12">
+                    <FinancialHealthScore income={data.income} expenses={data.expenses} />
                 </div>
+
 
                 <div className="grid lg:grid-cols-12 gap-8">
 
