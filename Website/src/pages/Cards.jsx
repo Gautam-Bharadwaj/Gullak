@@ -203,6 +203,46 @@ const CardDemo = () => {
             fee: "$120 Annual Fee",
             rating: 4.8,
             image: ""
+        },
+        // --- SINGAPORE ---
+        {
+            id: 501,
+            name: "DBS Altitude",
+            type: "Credit Card",
+            color: "from-red-600 to-blue-900",
+            category: "Travelers",
+            country: "🇸🇬 Singapore",
+            bank: "DBS",
+            benefits: [
+                "Earn miles that never expire",
+                "3 miles per $1 on online travel bookings",
+                "2 complimentary lounge visits per year",
+                "Eco-friendly card made of recycled plastic"
+            ],
+            bestFor: "Frequent Travelers",
+            fee: "S$194.40 (Waived for Year 1)",
+            rating: 4.7,
+            image: ""
+        },
+        // --- AUSTRALIA ---
+        {
+            id: 601,
+            name: "Westpac Altitude Black",
+            type: "Credit Card",
+            color: "from-red-500 to-slate-900",
+            category: "Luxury",
+            country: "🇦🇺 Australia",
+            bank: "WESTPAC",
+            benefits: [
+                "Earn Qantas or Altitude Points",
+                "2 complimentary lounge visits per year",
+                "Travel insurance for you and family",
+                "Personal concierge service"
+            ],
+            bestFor: "Premium Rewards & Qantas Miles",
+            fee: "$250 Annual Fee",
+            rating: 4.7,
+            image: ""
         }
     ];
 
