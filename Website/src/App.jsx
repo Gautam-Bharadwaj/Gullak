@@ -7,6 +7,7 @@ import EmiOptimizationPage from './pages/EmiOptimizationPage';
 import DebtOptimizer from './pages/DebtOptimizer';
 import Insights from './pages/Insights';
 import Auth from './pages/Auth';
+import Cards from './pages/Cards';
 
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -24,6 +25,7 @@ function App() {
             <Route path="/debt-optimizer" element={<DebtOptimizer />} />
             <Route path="/emi-optimization" element={<EmiOptimizationPage />} />
             <Route path="/insights" element={<Insights />} />
+            <Route path="/cards" element={<Cards />} />
             <Route path="/auth" element={<Auth />} />
           </Routes>
         </main>
