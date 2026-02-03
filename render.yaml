@@ -1,0 +1,31 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: gullak-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node api/server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.17.0
+      - key: GEMINI_API_KEY
+        sync: false # User must set this in Render dashboard
+      - key: MONGODB_URI
+        sync: false # Optional: User can set this for persistent storage
+      - key: PORT
+        value: 10000
+
+  # Frontend Static Site
+  - type: static
+    name: gullak-frontend
+    env: static
+    plan: free
+    buildCommand: cd Website && npm install && npm run build
+    staticPublishDir: Website/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          name: gullak-backend
+          type: web
+          property: host
