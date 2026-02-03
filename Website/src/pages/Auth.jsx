@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight, Wallet, CheckCircle2, ShieldCheck, AlertTriangle, Smartphone } from 'lucide-react';
+import { Mail, Lock, User, ArrowRight, Wallet, CheckCircle2, ShieldCheck, AlertTriangle, Smartphone, Eye, EyeOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 
 const Auth = () => {
@@ -11,6 +11,7 @@ const Auth = () => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const [emailOtpSent, setEmailOtpSent] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
@@ -240,13 +241,20 @@ const Auth = () => {
                                         <div className="relative">
                                             <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
                                             <input
-                                                type="password"
+                                                type={showPassword ? "text" : "password"}
                                                 required={mode !== 'verify-2fa'}
                                                 placeholder="Password"
                                                 value={formData.password}
                                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
                                             />
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-primary transition-colors"
+                                            >
+                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                            </button>
                                         </div>
                                     )}
                                 </motion.div>
