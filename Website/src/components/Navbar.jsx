@@ -34,6 +34,7 @@ const Navbar = () => {
         { name: 'EMI Optimization', path: '/#emi-optimization' },
         { name: 'Insights', path: '/insights' },
         { name: 'Calculate Expenses', path: '/calculate-expenses' },
+        { name: 'Cards', path: '/cards' },
     ];
 
     return (
