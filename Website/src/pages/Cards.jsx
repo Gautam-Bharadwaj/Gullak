@@ -189,6 +189,98 @@ const CardDemo = () => {
                         ))}
                     </div>
                 </div>
+
+                {/* Cards Grid */}
+                {filteredCards.length > 0 ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <AnimatePresence mode='popLayout'>
+                            {filteredCards.map((card) => (
+                                <motion.div
+                                    key={card.id}
+                                    layout
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ duration: 0.4 }}
+                                    className="group"
+                                >
+                                    <div className="glass h-full rounded-[2.5rem] border-white/5 overflow-hidden flex flex-col hover:border-primary/20 transition-colors duration-500">
+                                        <div className="p-6 pb-0">
+                                            <div className={`relative h-48 w-full rounded-2xl bg-gradient-to-br ${card.color} p-6 shadow-2xl transform group-hover:rotate-2 group-hover:-translate-y-2 transition-transform duration-500 overflow-hidden`}>
+                                                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+                                                <div className="relative h-full flex flex-col justify-between">
+                                                    <div className="flex justify-between items-start">
+                                                        <div className="w-10 h-8 bg-gradient-to-br from-yellow-300 to-yellow-600 rounded-md opacity-80 shadow-inner" />
+                                                        <div className="flex flex-col items-end">
+                                                            <div className="text-[10px] font-black tracking-widest text-white/60 mb-1">{card.bank}</div>
+                                                            <div className="text-[8px] font-bold text-white/40">{card.country}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                        <div className="text-xl font-bold tracking-widest mb-1 shadow-sm">{card.name}</div>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-8 h-5 rounded bg-white/20"></div>
+                                                            <div className="text-[10px] font-mono text-white/40">•••• •••• •••• {card.id.toString().padStart(4, '0')}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-8 flex-1 flex flex-col">
+                                            <div className="flex justify-between items-center mb-6">
+                                                <span className="px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black text-primary uppercase tracking-wider">{card.category}</span>
+                                                <div className="flex items-center gap-1 text-yellow-500">
+                                                    <Star size={14} fill="currentColor" />
+                                                    <span className="text-sm font-bold text-white">{card.rating}</span>
+                                                </div>
+                                            </div>
+
+                                            <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{card.name}</h3>
+                                            <p className="text-xs text-gray-500 font-bold mb-6 flex items-center gap-1">
+                                                <Zap size={14} className="text-secondary" />
+                                                Best for: {card.bestFor}
+                                            </p>
+
+                                            <div className="space-y-3 mb-8 flex-1">
+                                                {card.benefits.map((benefit, i) => (
+                                                    <div key={i} className="flex gap-3 text-sm text-gray-300">
+                                                        <CheckCircle2 size={16} className="text-secondary shrink-0 mt-0.5" />
+                                                        <span>{benefit}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            <div className="pt-6 border-t border-white/5 flex flex-col gap-4">
+                                                <div className="flex justify-between items-center px-2">
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase">Annual Fee</span>
+                                                    <span className="text-sm font-bold text-white">{card.fee}</span>
+                                                </div>
+                                                <button className="w-full bg-white/5 hover:bg-primary hover:text-background border border-white/10 hover:border-transparent py-3 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300">
+                                                    Explore Full Details <ExternalLink size={16} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                ) : (
+                    <div className="text-center py-20 glass rounded-[3rem] border-white/5">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <CreditCard className="text-gray-600" size={40} />
+                        </div>
+                        <h3 className="text-2xl font-bold mb-2">No cards found</h3>
+                        <p className="text-gray-500">Try adjusting your filters or search query.</p>
+                        <button
+                            onClick={() => { setSelectedCategory('All'); setSelectedCountry('Global'); setSearchQuery(''); }}
+                            className="mt-6 text-primary font-bold hover:underline"
+                        >
+                            Reset all filters
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );
