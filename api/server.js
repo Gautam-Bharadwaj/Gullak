@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const speakeasy = require('speakeasy');
+const QRCode = require('qrcode');
 require('dotenv').config();
 
 const app = express();
@@ -58,33 +60,114 @@ app.post('/api/auth/signup', (req, res) => {
         name,
         email,
         password, // In a real production app, you MUST hash this password!
-        joined: new Date().toISOString()
+        joined: new Date().toISOString(),
+        twoFactorEnabled: false,
+        twoFactorSecret: null
     };
 
     db.users.push(newUser);
-    
+
     // Initialize empty expenses for the new user
     db.expenses[newUser.id] = { expenses: [], income: 50000, updatedAt: new Date() };
-    
+
     writeData(db);
 
-    const { password: _, ...userWithoutPassword } = newUser;
+    const { password: _, twoFactorSecret: __, ...userWithoutPassword } = newUser;
     res.status(201).json({ message: 'User created successfully', user: userWithoutPassword });
 });
 
-// Login
+// Login (Step 1)
 app.post('/api/auth/login', (req, res) => {
     const { email, password } = req.body;
     const db = readData();
-    
+
     const user = db.users.find(u => u.email === email && u.password === password);
 
     if (!user) {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    const { password: _, ...userWithoutPassword } = user;
+    // Check 2FA
+    if (user.twoFactorEnabled) {
+        return res.json({
+            message: '2FA Verification Required',
+            require2fa: true,
+            userId: user.id
+        });
+    }
+
+    const { password: _, twoFactorSecret: __, ...userWithoutPassword } = user;
     res.json({ message: 'Login successful', user: userWithoutPassword });
+});
+
+// Login (Step 2: Verify 2FA)
+app.post('/api/auth/login/2fa', (req, res) => {
+    const { userId, token } = req.body;
+    const db = readData();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const verified = speakeasy.totp.verify({
+        secret: user.twoFactorSecret,
+        encoding: 'base32',
+        token: token
+    });
+
+    if (verified) {
+        const { password: _, twoFactorSecret: __, ...userWithoutPassword } = user;
+        res.json({ message: 'Login successful', user: userWithoutPassword });
+    } else {
+        res.status(401).json({ message: 'Invalid 2FA Token' });
+    }
+});
+
+// 2FA Setup: Generate Secret & QR
+app.post('/api/auth/2fa/setup', (req, res) => {
+    const { userId } = req.body;
+    const db = readData();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    const secret = speakeasy.generateSecret({ length: 20, name: `Gullak (${user.email})` });
+
+    // Temporarily store the secret (or you could store pending secrets differently)
+    // Here we will rely on the client sending it back to verify, or save it to DB temporarily
+    // For simplicity, let's update the user but keep enabled=false until verified
+
+    user.tempSecret = secret.base32;
+    writeData(db);
+
+    QRCode.toDataURL(secret.otpauth_url, (err, data_url) => {
+        if (err) return res.status(500).json({ message: 'Error generating QR code' });
+        res.json({ secret: secret.base32, qrCode: data_url });
+    });
+});
+
+// 2FA Setup: Verify & Enable
+app.post('/api/auth/2fa/verify', (req, res) => {
+    const { userId, token } = req.body;
+    const db = readData();
+    const user = db.users.find(u => u.id === userId);
+
+    if (!user || !user.tempSecret) return res.status(400).json({ message: 'Setup not initialized' });
+
+    const verified = speakeasy.totp.verify({
+        secret: user.tempSecret,
+        encoding: 'base32',
+        token: token
+    });
+
+    if (verified) {
+        user.twoFactorSecret = user.tempSecret;
+        user.twoFactorEnabled = true;
+        delete user.tempSecret;
+        writeData(db);
+        res.json({ message: 'Two-Factor Authentication Enabled Successfully' });
+    } else {
+        res.status(400).json({ message: 'Invalid Token. Please try again.' });
+    }
 });
 
 // Forgot Password (Mock)
@@ -110,10 +193,10 @@ app.get('/api/search/history', (req, res) => {
 app.post('/api/search/history', (req, res) => {
     const { query, timestamp } = req.body;
     const db = readData();
-    
+
     const newEntry = { id: Date.now().toString(), query, timestamp: timestamp || new Date() };
     db.searchHistory = [newEntry, ...db.searchHistory].slice(0, 50);
-    
+
     writeData(db);
     res.status(201).json(newEntry);
 });
@@ -124,7 +207,7 @@ app.post('/api/search/history', (req, res) => {
 app.get('/api/expenses', (req, res) => {
     const userId = req.query.userId; // Expect userId in query param
     const db = readData();
-    
+
     if (!userId) {
         // Fallback for backward compatibility or guest mode (returns global/first or empty)
         // For now, let's return a default structure if no user
@@ -138,16 +221,16 @@ app.get('/api/expenses', (req, res) => {
 // Save Expenses
 app.post('/api/expenses', (req, res) => {
     const { userId, expenses, income } = req.body;
-    
+
     if (!userId) {
         return res.status(400).json({ message: 'User ID is required to save data' });
     }
 
     const db = readData();
-    db.expenses[userId] = { 
-        expenses, 
-        income, 
-        updatedAt: new Date().toISOString() 
+    db.expenses[userId] = {
+        expenses,
+        income,
+        updatedAt: new Date().toISOString()
     };
 
     writeData(db);
