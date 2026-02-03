@@ -121,7 +121,74 @@ const CardDemo = () => {
     return (
         <div className="pt-28 pb-20 min-h-screen bg-background text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header and filters will go here */}
+                {/* Header Area */}
+                <div className="mb-12 text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-4 tracking-widest uppercase">
+                            <CreditCard size={14} />
+                            <span>Global Card Intelligence</span>
+                        </div>
+                        <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
+                            The World's <span className="text-gradient">Card Vault</span>
+                        </h1>
+                        <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
+                            Search and filter through 1,000+ cards from India, USA, UK, and beyond.
+                            Find the perfect plastic for your persona.
+                        </p>
+                    </motion.div>
+                </div>
+
+                {/* Search & Filters Row */}
+                <div className="flex flex-col gap-6 mb-12">
+                    {/* Search Bar */}
+                    <div className="relative max-w-2xl mx-auto w-full">
+                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                            <Info size={20} className="text-gray-500" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by card name or bank (e.g. Amex, HDFC, Chase)..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:border-primary transition-all text-lg font-medium"
+                        />
+                    </div>
+
+                    {/* Country Selector */}
+                    <div className="flex flex-wrap justify-center gap-3">
+                        {countries.map((country) => (
+                            <button
+                                key={country}
+                                onClick={() => setSelectedCountry(country)}
+                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCountry === country
+                                    ? 'bg-secondary text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                                    : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
+                                    }`}
+                            >
+                                {country}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Categories Filter */}
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {categories.map((cat) => (
+                            <button
+                                key={cat}
+                                onClick={() => setSelectedCategory(cat)}
+                                className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${selectedCategory === cat
+                                    ? 'bg-primary text-background'
+                                    : 'bg-white/5 text-gray-500 border border-white/5 hover:text-white'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
+                </div>
             </div>
         </div>
     );
