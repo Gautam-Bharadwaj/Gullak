@@ -31,6 +31,16 @@ const ExpenseCalculator = () => {
     const [isExporting, setIsExporting] = useState(false);
     const contentRef = useRef(null);
 
+    // Get User ID from LocalStorage
+    const getUser = () => {
+        try {
+            const userStr = localStorage.getItem('gullak_user');
+            return userStr ? JSON.parse(userStr) : null;
+        } catch (e) {
+            return null;
+        }
+    };
+
     // Auto-save effect
     useEffect(() => {
         localStorage.setItem('gullak_expenses', JSON.stringify(expenses));
@@ -38,11 +48,18 @@ const ExpenseCalculator = () => {
 
         // Sync to backend
         const syncToBackend = async () => {
+            const user = getUser();
+            if (!user || !user.id) return; // Don't sync if not logged in
+
             try {
                 await fetch('/api/expenses', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ expenses, income }),
+                    body: JSON.stringify({
+                        userId: user.id,
+                        expenses,
+                        income
+                    }),
                 });
             } catch (error) {
                 console.log('Backend sync failed, using localStorage');
@@ -55,13 +72,17 @@ const ExpenseCalculator = () => {
 
     useEffect(() => {
         const fetchExpenses = async () => {
+            const user = getUser();
+            if (!user || !user.id) return; // Don't fetch if not logged in
+
             try {
-                const res = await fetch('/api/expenses');
+                const res = await fetch(`/api/expenses?userId=${user.id}`);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data && data.expenses) {
-                        setExpenses(data.expenses);
-                        setIncome(data.income);
+                    // Only update if backend has data (might be empty for new user)
+                    if (data && (data.expenses || data.income)) {
+                        setExpenses(data.expenses || []); // Fallback to empty if undefined
+                        setIncome(data.income || 50000);
                     }
                 }
             } catch (error) {
