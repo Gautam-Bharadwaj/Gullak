@@ -1,11 +1,72 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, Star, Zap, ShoppingBag, Plane, Coffee, ShieldCheck, ChevronRight, Info, ExternalLink, CheckCircle2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CreditCard, Star, Zap, ShoppingBag, Plane, Coffee, ShieldCheck, ChevronRight, Info, ExternalLink, CheckCircle2, Sparkles, X, Search } from 'lucide-react';
 
 const CardDemo = () => {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedCountry, setSelectedCountry] = useState('🇮🇳 India');
     const [searchQuery, setSearchQuery] = useState('');
+    const [activeAiCard, setActiveAiCard] = useState(null);
+    const [aiInput, setAiInput] = useState('');
+    const [chatHistory, setChatHistory] = useState([]);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const chatEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [chatHistory, isAiLoading]);
+
+    const openChat = (card = { name: "General Assistant" }) => {
+        setActiveAiCard(card);
+        const welcomeMsg = {
+            role: 'assistant',
+            content: "Namaste! Welcome to meraGullak.com. How can I help you save? 🇮🇳 \n\nNamaste! How may I help you?"
+        };
+        setChatHistory([welcomeMsg]);
+        return [welcomeMsg];
+    };
+
+    const askAiExpert = async (card, customMessage = null, initialHistory = null) => {
+        const messageToSend = customMessage || "Is this card good for me? Tell me how much I can save.";
+        const currentHistory = initialHistory || chatHistory;
+
+        // Add user message to history
+        const newUserMessage = { role: 'user', content: messageToSend };
+        const updatedHistoryWithUser = [...currentHistory, newUserMessage];
+        setChatHistory(updatedHistoryWithUser);
+
+        setActiveAiCard(card);
+        setIsAiLoading(true);
+        setAiInput('');
+
+        try {
+            const response = await fetch('http://localhost:5001/api/ai/card-expert', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cardName: card.name,
+                    cardData: card,
+                    userMessage: messageToSend,
+                    history: updatedHistoryWithUser.filter(m => m.role !== 'assistant' || !m.content.includes("Namaste"))
+                })
+            });
+            const data = await response.json();
+
+            // Add AI response to history
+            const newAssistantMessage = { role: 'assistant', content: data.reply };
+            setChatHistory(prev => [...prev, newAssistantMessage]);
+        } catch (error) {
+            const errorMessage = { role: 'assistant', content: "Sorry, main abhi busy hoon. Thodi der baad try karein! (Check server/API key)" };
+            setChatHistory(prev => [...prev, errorMessage]);
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
 
     const cardData = [
         // --- INDIA ---
@@ -14,7 +75,7 @@ const CardDemo = () => {
             name: "HDFC Millennia",
             type: "Credit Card",
             color: "from-blue-600 to-indigo-900",
-            category: "Personal",
+            category: "Shopping",
             country: "🇮🇳 India",
             bank: "HDFC BANK",
             benefits: [
@@ -33,7 +94,7 @@ const CardDemo = () => {
             name: "IDFC First WOW",
             type: "Credit Card",
             color: "from-emerald-600 to-teal-900",
-            category: "Students",
+            category: "Student",
             country: "🇮🇳 India",
             bank: "IDFC FIRST",
             benefits: [
@@ -52,7 +113,7 @@ const CardDemo = () => {
             name: "Axis Atlas",
             type: "Credit Card",
             color: "from-amber-500 to-amber-800",
-            category: "Travelers",
+            category: "Travel",
             country: "🇮🇳 India",
             bank: "AXIS BANK",
             benefits: [
@@ -66,13 +127,583 @@ const CardDemo = () => {
             rating: 4.7,
             image: ""
         },
+        {
+            id: 4,
+            name: "SBI Cashback",
+            type: "Credit Card",
+            color: "from-blue-400 to-blue-700",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "5% Cashback on ALL online spends",
+                "1% Cashback on offline spends",
+                "No merchant-specific restrictions",
+                "Direct credit to credit card account"
+            ],
+            bestFor: "Direct Cashback Lovers",
+            fee: "₹999 (Waived on ₹2L spend)",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 5,
+            name: "Amazon Pay ICICI",
+            type: "Credit Card",
+            color: "from-orange-500 to-slate-900",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "ICICI BANK",
+            benefits: [
+                "5% Reward Points for Prime members",
+                "2% on 100+ partner merchants",
+                "1% on all other spends",
+                "Life Time Free Card"
+            ],
+            bestFor: "Amazon Prime Users",
+            fee: "₹0 (Lifetime Free)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 6,
+            name: "Amex Gold Card",
+            type: "Charge Card",
+            color: "from-yellow-400 to-yellow-700",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "AMERICAN EXPRESS",
+            benefits: [
+                "5X Membership Rewards points on spends",
+                "1,000 Bonus Points for 6 transactions",
+                "Exclusive Reward Multiplier portal",
+                "Premium Travel & Dining benefits"
+            ],
+            bestFor: "Reward Point Maximizers",
+            fee: "₹4,500 + GST",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 7,
+            name: "HDFC Regalia Gold",
+            type: "Credit Card",
+            color: "from-yellow-600 to-slate-900",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "4 Reward Points per ₹150 spent",
+                "Complimentary Club Marriott membership",
+                "12 Domestic & 6 International Lounge visits",
+                "Premium Flight & Hotel redemption"
+            ],
+            bestFor: "Business & Travel Enthusiasts",
+            fee: "₹2,500 (Waived on ₹4L spend)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 8,
+            name: "Standard Chartered Smart",
+            type: "Credit Card",
+            color: "from-blue-800 to-blue-600",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "STANDARD CHARTERED",
+            benefits: [
+                "2% Cashback on all online spends",
+                "Flat 1% Cashback on offline spends",
+                "Special introductory offer benefits",
+                "Simple and straightforward rewards"
+            ],
+            bestFor: "Simple Online Value",
+            fee: "₹499 (Waived on ₹1.2L spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 9,
+            name: "Kotak League Platinum",
+            type: "Credit Card",
+            color: "from-red-600 to-slate-800",
+            category: "Student",
+            country: "🇮🇳 India",
+            bank: "KOTAK MAHINDRA",
+            benefits: [
+                "Up to 8X Reward Points on spends",
+                "PVR movie tickets as milestone rewards",
+                "Fuel surcharge waiver across India",
+                "Lounge access available on Select variants"
+            ],
+            bestFor: "PVR & Entertainment lovers",
+            fee: "₹499 (Lifetime Free for selected)",
+            rating: 4.3,
+            image: ""
+        },
+        {
+            id: 10,
+            name: "OneCard",
+            type: "Credit Card",
+            color: "from-slate-800 to-black",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "BOB/SBM/FEDERAL",
+            benefits: [
+                "Full Metal Card experience",
+                "No Joining or Annual Fees",
+                "Instant rewards & category multipliers",
+                "Best-in-class mobile app control"
+            ],
+            bestFor: "Tech-savvy Millennials",
+            fee: "₹0 (Forever Free)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 11,
+            name: "Axis Flipkart",
+            type: "Credit Card",
+            color: "from-blue-200 to-blue-500",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "5% Unlimited Cashback on Flipkart",
+                "4% on preferred partners (Swiggy, PVR)",
+                "1.5% Unlimited on all other spends",
+                "4 Domestic lounge visits per year"
+            ],
+            bestFor: "Flipkart Loyalists",
+            fee: "₹500 (Waived on ₹3.5L spend)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 12,
+            name: "ICICI Coral",
+            type: "Credit Card",
+            color: "from-blue-400 to-slate-400",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "ICICI BANK",
+            benefits: [
+                "2 Reward Points per ₹100 spent",
+                "Buy 1 Get 1 on movie tickets (BookMyShow)",
+                "Complimentary Airport & Railway Lounge visits",
+                "Exclusive dining offers via Culinary Treats"
+            ],
+            bestFor: "Everyday Rewards & Movies",
+            fee: "₹500 (Waived on ₹1.5L spend)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 13,
+            name: "HDFC Tata Neu Infinity",
+            type: "Credit Card",
+            color: "from-black to-slate-800",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "5% NeuCoins on Tata Neu & partner brands",
+                "1.5% NeuCoins on all other spends",
+                "8 Domestic & 4 International Lounge visits",
+                "Additional 5% NeuCoins on Tata Neu App"
+            ],
+            bestFor: "Tata Ecosystem Shoppers",
+            fee: "₹1,499 (Waived on ₹3L spend)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 14,
+            name: "SBI SimplyClick",
+            type: "Credit Card",
+            color: "from-blue-500 to-indigo-600",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "10X Points on Amazon, Apollo, Cleartrip, Netmeds",
+                "5X Points on all other online spends",
+                "₹500 Amazon welcome voucher",
+                "Milestone e-vouchers worth ₹2,000"
+            ],
+            bestFor: "Online Shopping Beginners",
+            fee: "₹499 (Waived on ₹1L spend)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 15,
+            name: "Axis Magnus",
+            type: "Credit Card",
+            color: "from-slate-700 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "12 Reward Points per ₹200 spent",
+                "25,000 Reward Points on monthly milestone",
+                "Unlimited Domestic & International Lounge access",
+                "Buy 1 Get 1 on movies up to ₹500"
+            ],
+            bestFor: "High Net-worth Individuals",
+            fee: "₹12,500 + GST",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 16,
+            name: "IDFC First Select",
+            type: "Credit Card",
+            color: "from-red-800 to-amber-900",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "IDFC FIRST",
+            benefits: [
+                "Up to 10X Reward Points on spends",
+                "Buy 1 Get 1 on movie tickets",
+                "Complimentary Airport & Railway Lounge access",
+                "Zero interest on cash withdrawals"
+            ],
+            bestFor: "Premium Lifestyle Benefits",
+            fee: "₹0 (Life Time Free)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 17,
+            name: "Amex Plat Travel",
+            type: "Credit Card",
+            color: "from-slate-400 to-indigo-400",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "AMERICAN EXPRESS",
+            benefits: [
+                "₹40,000+ value in bonus Membership Rewards",
+                "Taj gift cards as milestone rewards",
+                "Complimentary Lounge access",
+                "Priority Assistance for travelers"
+            ],
+            bestFor: "Vacation Savers",
+            fee: "₹5,000 (Free in Year 1)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 18,
+            name: "SBI Prime",
+            type: "Credit Card",
+            color: "from-indigo-800 to-slate-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "10 Points per ₹100 on Dining & Movies",
+                "20 Points per ₹100 on Birthday spends",
+                "Trident Privilege & Club Vistara membership",
+                "8 Domestic & 4 International Lounges"
+            ],
+            bestFor: "Premium Dining & Travel",
+            fee: "₹2,999 (Waived on ₹3L spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 19,
+            name: "AU LIT Card",
+            type: "Credit Card",
+            color: "from-purple-500 to-indigo-700",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "AU SMALL FINANCE",
+            benefits: [
+                "India's first customizable credit card",
+                "Choose features you want and pay only for those",
+                "Switch features on/off instantly via app",
+                "Real-time tracking of spends and rewards"
+            ],
+            bestFor: "Full Customization Control",
+            fee: "₹0 (Customizable charges)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 20,
+            name: "Axis Ace",
+            type: "Credit Card",
+            color: "from-green-600 to-teal-800",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "Flat 2% Cashback on all spends",
+                "5% Cashback on Bill payments via GPay",
+                "4% on Swiggy, Zomato, and Ola",
+                "Unlimited cashback with no cap"
+            ],
+            bestFor: "High Cashback on Utilities",
+            fee: "₹499 (Waived on ₹2L spend)",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 21,
+            name: "HDFC Infinia",
+            type: "Credit Card",
+            color: "from-slate-900 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "Invited-only Metal Card",
+                "5 Reward Points per ₹150 spent",
+                "Unlimited Airport Lounge access globally",
+                "Luxury hotel perks and dining via Global Concierge"
+            ],
+            bestFor: "Ultra-High Net Worth Individuals",
+            fee: "₹12,500 (Waived on criteria)",
+            rating: 5.0,
+            image: ""
+        },
+        {
+            id: 22,
+            name: "Axis Airtel Card",
+            type: "Credit Card",
+            color: "from-red-500 to-slate-900",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "25% Cashback on Airtel bills & recharge",
+                "10% Cashback on Swiggy, Zomato, BigBasket",
+                "10% Cashback on utility bill payments",
+                "1% on all other spends"
+            ],
+            bestFor: "Airtel Users & Utility Bills",
+            fee: "₹500 (Waived on ₹2L spend)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 23,
+            name: "SBI SimplySave",
+            type: "Credit Card",
+            color: "from-blue-600 to-blue-900",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "10 Reward Points on Dining, Movies & Groceries",
+                "1 Reward Point per ₹150 on other spends",
+                "2,000 Bonus points on ₹2,000 spend in 60 days",
+                "Worldwide acceptance and fuel surcharge waiver"
+            ],
+            bestFor: "Everyday Offline Spends",
+            fee: "₹499 (Waived on ₹1L spend)",
+            rating: 4.2,
+            image: ""
+        },
+        {
+            id: 24,
+            name: "Axis Vistara Signature",
+            type: "Credit Card",
+            color: "from-purple-800 to-indigo-900",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "Premium Economy class ticket on joining",
+                "4 CV points per ₹200 spent",
+                "Up to 4 milestone Premium Economy tickets",
+                "Complimentary Airport Lounge access"
+            ],
+            bestFor: "Vistara Loyalists",
+            fee: "₹3,000 + GST",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 25,
+            name: "RBL Shoprite",
+            type: "Credit Card",
+            color: "from-red-400 to-red-600",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "RBL BANK",
+            benefits: [
+                "5% Value back on Grocery spends",
+                "10% discount on BookMyShow tickets",
+                "Fuel surcharge waiver up to ₹100 monthly",
+                "Simple rewards on all other categories"
+            ],
+            bestFor: "Budget-conscious Grocery Shoppers",
+            fee: "₹500 (Waived on ₹1L spend)",
+            rating: 4.1,
+            image: ""
+        },
+        {
+            id: 26,
+            name: "HDFC Diners Black",
+            type: "Credit Card",
+            color: "from-slate-800 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "5 Reward Points per ₹150 spent",
+                "Unlimited Lounge Access globally",
+                "Complimentary Golf games and memberships",
+                "1:1 Transfer to Air Miles and Partners"
+            ],
+            bestFor: "Luxury Travel & Rewards",
+            fee: "₹10,000 (Waived on criteria)",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 27,
+            name: "ICICI Sapphiro",
+            type: "Credit Card",
+            color: "from-slate-400 to-blue-500",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "ICICI BANK",
+            benefits: [
+                "Vouchers worth ₹9,000+ on joining",
+                "Buy 1 Get 1 on movies via BookMyShow",
+                "Domestic & International Lounge access",
+                "Golf rounds and spa access"
+            ],
+            bestFor: "Lifestyle & Entertainment",
+            fee: "₹6,500 (Free for selected alumni)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 28,
+            name: "HSBC Visa Platinum",
+            type: "Credit Card",
+            color: "from-red-600 to-slate-600",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "HSBC",
+            benefits: [
+                "Life Time Free Zero joining fee",
+                "10% Cashback up to ₹2,000 on first 60 days",
+                "Buy 1 Get 1 on BookMyShow (Saturdays)",
+                "Dining discounts at 1,000+ restaurants"
+            ],
+            bestFor: "Zero Fee Reward Seekers",
+            fee: "₹0 (Always Free)",
+            rating: 4.3,
+            image: ""
+        },
+        {
+            id: 29,
+            name: "SBI Elite",
+            type: "Credit Card",
+            color: "from-yellow-700 to-slate-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "₹5,000 Welcome gift voucher",
+                "Free Movie tickets worth ₹6,000 yearly",
+                "6 International & 8 Domestic Lounge visits",
+                "Milestone rewards worth 50,000 points"
+            ],
+            bestFor: "Movie Lovers & High Spenders",
+            fee: "₹4,999 (Waived on ₹10L spend)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 30,
+            name: "Amex Plat Reserve",
+            type: "Credit Card",
+            color: "from-slate-300 to-indigo-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "AMERICAN EXPRESS",
+            benefits: [
+                "Complimentary Taj/Oberoi vouchers",
+                "Priority Pass and Lounge access",
+                "Exclusive concierge and travel desk",
+                "Dedicated relationship manager"
+            ],
+            bestFor: "Elite Travel Experiences",
+            fee: "₹10,000 + GST",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 31,
+            name: "HDFC MoneyBack+",
+            type: "Credit Card",
+            color: "from-blue-400 to-indigo-500",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "10X Points on Amazon, BigBasket, Flipkart, Swiggy",
+                "5X Points on EMI spends",
+                "2 Reward Points per ₹150 on other spends",
+                "₹500 gift voucher on quarterly milestones"
+            ],
+            bestFor: "Starter Shopping Card",
+            fee: "₹500 (Waived on ₹50k spend)",
+            rating: 4.3,
+            image: ""
+        },
+        {
+            id: 32,
+            name: "Axis Neo",
+            type: "Credit Card",
+            color: "from-indigo-400 to-blue-600",
+            category: "Student",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "40% off on Zomato (Up to ₹120)",
+                "5% off on Amazon Pay bills",
+                "10% off on BookMyShow & Blinkit",
+                "Easy approval for entry-level users"
+            ],
+            bestFor: "Online Food & Bill Discounts",
+            fee: "₹250 (Often Free/LTF)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 33,
+            name: "IDFC First Wealth",
+            type: "Credit Card",
+            color: "from-slate-800 to-slate-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "IDFC FIRST",
+            benefits: [
+                "Up to 10X Reward Points with no expiry",
+                "Buy 1 Get 1 on movie tickets up to ₹500",
+                "Unlimited Domestic Lounge & Spa access",
+                "Low interest rate starting from 0.75%"
+            ],
+            bestFor: "Premium Lifestyle & Savings",
+            fee: "₹0 (Life Time Free)",
+            rating: 4.9,
+            image: ""
+        },
         // --- USA ---
         {
             id: 101,
             name: "Chase Sapphire Preferred",
             type: "Credit Card",
             color: "from-blue-800 to-blue-950",
-            category: "Travelers",
+            category: "Travel",
             country: "🇺🇸 USA",
             bank: "CHASE",
             benefits: [
@@ -111,7 +742,7 @@ const CardDemo = () => {
             name: "Amex Gold UK",
             type: "Credit Card",
             color: "from-yellow-600 to-yellow-900",
-            category: "Travelers",
+            category: "Travel",
             country: "🇬🇧 UK",
             bank: "AMERICAN EXPRESS",
             benefits: [
@@ -130,7 +761,7 @@ const CardDemo = () => {
             name: "Barclaycard Forward",
             type: "Credit Card",
             color: "from-blue-400 to-blue-600",
-            category: "Students",
+            category: "Student",
             country: "🇬🇧 UK",
             bank: "BARCLAYS",
             benefits: [
@@ -190,7 +821,7 @@ const CardDemo = () => {
             name: "Scotiabank Gold Amex",
             type: "Credit Card",
             color: "from-red-700 to-red-900",
-            category: "Travelers",
+            category: "Travel",
             country: "🇨🇦 Canada",
             bank: "SCOTIABANK",
             benefits: [
@@ -210,7 +841,7 @@ const CardDemo = () => {
             name: "DBS Altitude",
             type: "Credit Card",
             color: "from-red-600 to-blue-900",
-            category: "Travelers",
+            category: "Travel",
             country: "🇸🇬 Singapore",
             bank: "DBS",
             benefits: [
@@ -306,7 +937,7 @@ const CardDemo = () => {
         }
     ];
 
-    const categories = ['All', 'Students', 'Personal', 'Business', 'Travelers', 'Luxury'];
+    const categories = ['All', 'Travel', 'Student', 'Shopping', 'Luxury', 'Personal'];
     const countries = ['🇮🇳 India', '🇺🇸 USA', '🇬🇧 UK', '🇦🇪 UAE', '🇨🇦 Canada', '🇪🇺 Europe', '🇯🇵 Japan', '🇭🇰 Hong Kong', '🇸🇬 Singapore', '🇦🇺 Australia', 'Global'];
 
     const filteredCards = cardData.filter(card => {
@@ -321,64 +952,58 @@ const CardDemo = () => {
         <div className="pt-28 pb-20 min-h-screen bg-background text-white">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header Area */}
-                <div className="mb-12 text-center">
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                    >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-4 tracking-widest uppercase">
-                            <CreditCard size={14} />
-                            <span>Global Card Intelligence</span>
-                        </div>
-                        <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
-                            The World's <span className="text-gradient">Card Vault</span>
-                        </h1>
-                        <p className="text-gray-400 text-lg max-w-2xl mx-auto leading-relaxed">
-                            Search and filter through 1,000+ cards from India, USA, UK, and beyond.
-                            Find the perfect plastic for your persona.
-                        </p>
-                    </motion.div>
+                <div className="mb-12">
+                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6 mb-8">
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="text-center md:text-left flex-1"
+                        >
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-4 tracking-widest uppercase">
+                                <CreditCard size={14} />
+                                <span>Global Card Intelligence</span>
+                            </div>
+                            <h1 className="text-4xl md:text-6xl font-black tracking-tight mb-4">
+                                The World's <span className="text-gradient">Card Vault</span>
+                            </h1>
+                            <p className="text-gray-400 text-lg max-w-2xl leading-relaxed">
+                                Search and filter through 1,000+ cards from India, USA, UK, and beyond.
+                                Find the perfect plastic for your persona.
+                            </p>
+                        </motion.div>
+
+                    </div>
                 </div>
 
-                {/* Search & Filters Row */}
+                {/* Search Row */}
                 <div className="flex flex-col gap-6 mb-12">
                     {/* Search Bar */}
-                    <div className="relative max-w-2xl mx-auto w-full">
-                        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                            <Info size={20} className="text-gray-500" />
+                    <div className="relative max-w-2xl mx-auto w-full group">
+                        <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
+                            <Search size={22} className="text-gray-500" />
                         </div>
                         <input
                             type="text"
-                            placeholder="Search by card name or bank (e.g. Amex, HDFC, Chase)..."
+                            placeholder="Search by card name or bank (e.g. Amex, HDFC, SBI)..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-white focus:outline-none focus:border-primary transition-all text-lg font-medium"
+                            className="w-full bg-white/5 border border-white/10 rounded-[2rem] py-5 pl-14 pr-20 text-white focus:outline-none focus:border-primary/50 focus:bg-white/[0.08] transition-all text-lg font-medium shadow-[0_0_20px_rgba(0,0,0,0.2)]"
                         />
+                        <div className="absolute inset-y-0 right-5 flex items-center pointer-events-none">
+                            <kbd className="hidden sm:inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/10 border border-white/10 text-gray-500 font-mono text-xs font-bold">
+                                <span>⌘</span>
+                                <span>K</span>
+                            </kbd>
+                        </div>
                     </div>
 
-                    {/* Country Selector */}
+                    {/* Category Filter Section */}
                     <div className="flex flex-wrap justify-center gap-3">
-                        {countries.map((country) => (
-                            <button
-                                key={country}
-                                onClick={() => setSelectedCountry(country)}
-                                className={`px-6 py-2 rounded-xl text-sm font-bold transition-all duration-300 flex items-center gap-2 ${selectedCountry === country
-                                    ? 'bg-secondary text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]'
-                                    : 'bg-white/5 text-gray-400 border border-white/10 hover:bg-white/10'
-                                    }`}
-                            >
-                                {country}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Categories Filter */}
-                    <div className="flex flex-wrap justify-center gap-2">
-                        {categories.map((cat) => (
+                        {['All', 'Travel', 'Student', 'Shopping', 'Luxury', 'Personal'].map((cat) => (
                             <button
                                 key={cat}
                                 onClick={() => setSelectedCategory(cat)}
-                                className={`px-5 py-2 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 ${selectedCategory === cat
+                                className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 ${selectedCategory === cat
                                     ? 'bg-primary text-background'
                                     : 'bg-white/5 text-gray-500 border border-white/5 hover:text-white'
                                     }`}
@@ -455,8 +1080,14 @@ const CardDemo = () => {
                                                     <span className="text-[10px] font-black text-gray-500 uppercase">Annual Fee</span>
                                                     <span className="text-sm font-bold text-white">{card.fee}</span>
                                                 </div>
-                                                <button className="w-full bg-white/5 hover:bg-primary hover:text-background border border-white/10 hover:border-transparent py-3 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all duration-300">
-                                                    Explore Full Details <ExternalLink size={16} />
+                                                <button
+                                                    onClick={() => {
+                                                        const freshHistory = openChat(card);
+                                                        askAiExpert(card, null, freshHistory);
+                                                    }}
+                                                    className="w-full bg-primary/10 hover:bg-primary/20 border border-primary/30 py-3 px-6 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 text-primary transition-all duration-300"
+                                                >
+                                                    <Sparkles size={16} /> Ask AI Expert
                                                 </button>
                                             </div>
                                         </div>
@@ -481,31 +1112,125 @@ const CardDemo = () => {
                     </div>
                 )}
 
-                {/* Comparison Logic Hint */}
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    whileInView={{ opacity: 1 }}
-                    className="mt-20 glass p-8 md:p-12 rounded-[3rem] border-primary/10 bg-primary/5 text-center relative overflow-hidden"
-                >
-                    <div className="absolute top-0 left-0 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -ml-32 -mt-32"></div>
-                    <div className="relative z-10">
-                        <h2 className="text-3xl font-black mb-6">Confused which one to pick?</h2>
-                        <p className="text-gray-400 max-w-2xl mx-auto mb-8">
-                            Our AI Munshi can analyze your monthly expense data and suggest the exact card
-                            that would have saved you the most money in the last 30 days.
-                        </p>
-                        <div className="flex flex-wrap justify-center gap-4">
-                            <button className="px-8 py-4 bg-primary text-background font-bold rounded-2xl shadow-[0_0_30px_rgba(255,215,0,0.3)] hover:scale-105 transition-all">
-                                Connect My Bank (Coming Soon)
-                            </button>
-                            <button className="px-8 py-4 bg-white/5 border border-white/10 font-bold rounded-2xl hover:bg-white/10 transition-all">
-                                Use Manual Spends
-                            </button>
+
+
+                {/* AI Assistant Side Panel */}
+                <AnimatePresence>
+                    {activeAiCard && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: 50, scale: 0.95 }}
+                            className="fixed bottom-24 right-8 w-80 z-40 flex flex-col"
+                        >
+                            <div className="bg-background border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col h-[450px]">
+                                {/* Chat Header - Sleeker Professional Design */}
+                                <div className="bg-primary p-5 flex justify-between items-center bg-gradient-to-r from-primary to-yellow-500">
+                                    <div className="flex items-center gap-3 text-background">
+                                        <div className="w-10 h-10 rounded-full bg-background/20 flex items-center justify-center">
+                                            <Sparkles size={20} className="fill-current" />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-base font-black tracking-tight leading-none uppercase">Gullak AI</h4>
+                                            <p className="text-[10px] font-bold opacity-70 uppercase tracking-widest mt-0.5">Expert Advisor</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setActiveAiCard(null)}
+                                        className="text-background/80 hover:text-background p-1.5 transition-all"
+                                    >
+                                        <X size={24} strokeWidth={2.5} />
+                                    </button>
+                                </div>
+
+                                {/* Chat Messages Area - Professional spacing & smaller text */}
+                                <div className="flex-1 overflow-y-auto p-5 space-y-4 bg-[#0a0a0a]">
+                                    {chatHistory.map((msg, idx) => (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            key={idx}
+                                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div className={`max-w-[90%] p-2.5 rounded-xl text-[11px] leading-relaxed shadow-sm whitespace-pre-wrap ${msg.role === 'user'
+                                                ? 'bg-primary text-background font-black rounded-tr-none'
+                                                : 'bg-white/5 text-gray-400 border border-white/10 rounded-tl-none font-bold'
+                                                }`}>
+                                                {msg.content}
+                                            </div>
+                                        </motion.div>
+                                    ))}
+
+                                    {isAiLoading && (
+                                        <div className="flex justify-start">
+                                            <div className="bg-white/5 border border-white/10 p-3 rounded-2xl rounded-tl-none flex gap-1 shadow-sm">
+                                                <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></div>
+                                                <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                                                <div className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div ref={chatEndRef} />
+                                </div>
+
+                                {/* Chat Input Area - Compact & Professional */}
+                                <div className="p-4 bg-background border-t border-white/5">
+                                    <div className="flex gap-2 relative">
+                                        <input
+                                            type="text"
+                                            placeholder="Optimize my finances..."
+                                            value={aiInput}
+                                            onChange={(e) => setAiInput(e.target.value)}
+                                            className="flex-1 bg-white/5 border border-white/10 rounded-xl py-2.5 px-4 text-xs focus:outline-none focus:border-primary/50 transition-all font-medium placeholder:text-gray-600"
+                                            onKeyPress={(e) => {
+                                                if (e.key === 'Enter' && aiInput.trim()) {
+                                                    askAiExpert(activeAiCard, aiInput);
+                                                }
+                                            }}
+                                        />
+                                        <button
+                                            onClick={() => aiInput.trim() && askAiExpert(activeAiCard, aiInput)}
+                                            className="bg-primary text-background p-2 px-3 rounded-xl hover:bg-yellow-500 transition-colors shadow-md flex items-center justify-center"
+                                        >
+                                            <ChevronRight size={18} strokeWidth={3} />
+                                        </button>
+                                    </div>
+                                    <div className="mt-2 text-[8px] text-gray-700 text-center font-black uppercase tracking-widest">Proudly Made in India</div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Floating Chat Button - Sleek Glass Pill Design */}
+                {!activeAiCard && (
+                    <motion.button
+                        initial={{ y: 100, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        whileHover={{ y: -5, scale: 1.02 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => openChat()}
+                        className="fixed bottom-10 right-10 flex items-center gap-3 px-6 py-4 bg-background/60 backdrop-blur-2xl border border-white/10 rounded-full shadow-[0_20px_40px_rgba(0,0,0,0.4)] group overflow-hidden z-50 ring-1 ring-white/5"
+                    >
+                        {/* Interactive Aura Glow */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-primary/20 via-primary/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out" />
+
+                        <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 border border-primary/20">
+                            <Sparkles size={18} className="text-primary fill-primary/20 group-hover:scale-110 transition-transform" />
                         </div>
-                    </div>
-                </motion.div>
-            </div>
-        </div>
+
+                        <div className="relative flex flex-col items-start pr-2">
+                            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] leading-none mb-1">Gullak AI</span>
+                            <span className="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Open Card Expert</span>
+                        </div>
+
+                        {/* Decorative 'Active' dot */}
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse shadow-[0_0_10px_rgba(255,215,0,0.8)]" />
+                    </motion.button>
+                )}
+
+            </div >
+        </div >
     );
 };
 
