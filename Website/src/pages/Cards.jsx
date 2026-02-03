@@ -697,6 +697,576 @@ const CardDemo = () => {
             rating: 4.9,
             image: ""
         },
+        {
+            id: 34,
+            name: "Axis Reserve",
+            type: "Credit Card",
+            color: "from-amber-600 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "Ultra-Premium Metal Card Experience",
+                "Unlimited Airport Lounge access for self & guests",
+                "15 complimentary Meet & Assist services",
+                "Accor Plus & Club Marriott memberships"
+            ],
+            bestFor: "High-Net Worth Individuals",
+            fee: "₹50,000 + GST",
+            rating: 5.0,
+            image: ""
+        },
+        {
+            id: 35,
+            name: "Yes Bank Marquee",
+            type: "Credit Card",
+            color: "from-slate-700 to-blue-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "YES BANK",
+            benefits: [
+                "36 Reward Points per ₹200 on online spends",
+                "Unlimited Domestic & International Lounges",
+                "Buy 1 Get 1 movies on BookMyShow",
+                "Low Forex markup of 1%"
+            ],
+            bestFor: "Luxury Lifestyle & Shopping",
+            fee: "₹9,999 (Waived on ₹10L spend)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 36,
+            name: "Scapia Federal",
+            type: "Credit Card",
+            color: "from-indigo-600 to-indigo-900",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "FEDERAL BANK",
+            benefits: [
+                "Zero Forex Markup on all International spends",
+                "Unlimited Lounge access (on ₹5k monthly spend)",
+                "Instant 10% Scapia Coins on every spend",
+                "Easy app-based travel booking"
+            ],
+            bestFor: "Frequent International Travelers",
+            fee: "₹0 (Life Time Free)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 37,
+            name: "AU Zenith",
+            type: "Credit Card",
+            color: "from-gray-800 to-slate-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "AU SMALL FINANCE",
+            benefits: [
+                "20 Reward Points per ₹100 on Dining",
+                "Complimentary Taj Epicure membership",
+                "Domestic & International Lounge access",
+                "Low Forex markup of 1.99%"
+            ],
+            bestFor: "Premium Dining & Lifestyle",
+            fee: "₹7,999 (Waived on ₹5L spend)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 38,
+            name: "HSBC Live+",
+            type: "Credit Card",
+            color: "from-red-500 to-red-700",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "HSBC BANK",
+            benefits: [
+                "10% Cashback on Dining, Grocery & Food Delivery",
+                "1.5% Cashback on all other spends",
+                "15% discount on 1,000+ restaurants",
+                "Simple cashback credited to statement"
+            ],
+            bestFor: "Daily Lifestyle & Foodies",
+            fee: "₹999 (Waived on ₹2L spend)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 39,
+            name: "Axis Indian Oil",
+            type: "Credit Card",
+            color: "from-orange-500 to-orange-700",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "4% value back as fuel points",
+                "1% fuel surcharge waiver",
+                "10% instant discount on BookMyShow",
+                "Reward points on online shopping"
+            ],
+            bestFor: "Fuel & Daily Commute",
+            fee: "₹500 (Waived on ₹50k spend)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 40,
+            name: "Amex SmartEarn",
+            type: "Credit Card",
+            color: "from-blue-400 to-blue-600",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "AMERICAN EXPRESS",
+            benefits: [
+                "10X Points on Flipkart, Swiggy, Uber & Zomato",
+                "5X Points on Amazon spends",
+                "Joining bonus of 500 bonus points",
+                "Amex safety & world-class service"
+            ],
+            bestFor: "Millennial Online Shoppers",
+            fee: "₹495 (Waived on ₹40k spend)",
+            rating: 4.3,
+            image: ""
+        },
+        {
+            id: 41,
+            name: "RBL World Safari",
+            type: "Credit Card",
+            color: "from-teal-600 to-emerald-800",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "RBL BANK",
+            benefits: [
+                "First Travel card with 0% Markup Fee",
+                "Complimentary Lounge access globally",
+                "Travel insurance coverage included",
+                "Milestone points for flight bookings"
+            ],
+            bestFor: "Foreign Spends & Safari",
+            fee: "₹3,000 + GST",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 42,
+            name: "Standard Chartered DigiSmart",
+            type: "Credit Card",
+            color: "from-blue-500 to-emerald-500",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "STANDARD CHARTERED",
+            benefits: [
+                "20% off on Myntra every month",
+                "10% off on Grofers & Zomato",
+                "10% off on Ola cab bookings",
+                "Buy 1 Get 1 on INOX movie tickets"
+            ],
+            bestFor: "Smart Online Savers",
+            fee: "₹49 Monthly (Waived on ₹5k spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 43,
+            name: "BoB Eterna",
+            type: "Credit Card",
+            color: "from-orange-600 to-slate-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "BOB FINANCIAL",
+            benefits: [
+                "15 Reward Points per ₹100 on Dining/Travel",
+                "Unlimited Domestic Lounge access",
+                "Fitternity membership & Golf access",
+                "Buy 1 Get 1 movies on Paytm"
+            ],
+            bestFor: "Premium Travelers & Fitness",
+            fee: "₹2,499 (Waived on ₹4L spend)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 44,
+            name: "HDFC Tata Neu Plus",
+            type: "Credit Card",
+            color: "from-red-600 to-slate-800",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "HDFC BANK",
+            benefits: [
+                "2% NeuCoins on Tata Neu & Partners",
+                "1% NeuCoins on all other spends",
+                "4 Domestic Lounge visits per year",
+                "Additional 5% NeuCoins on Tata Neu App"
+            ],
+            bestFor: "Tata Ecosystem Shoppers",
+            fee: "₹499 (Waived on ₹1L spend)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 45,
+            name: "Kotak Zen Signature",
+            type: "Credit Card",
+            color: "from-slate-600 to-slate-800",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "KOTAK MAHINDRA",
+            benefits: [
+                "10 Zen Points per ₹150 on online spends",
+                "Complimentary Priority Pass membership",
+                "Milestone rewards worth ₹1,500 monthly",
+                "8 Domestic Lounge visits per year"
+            ],
+            bestFor: "Balanced Lifestyle Spends",
+            fee: "₹1,500 (Waived on ₹1.5L spend)",
+            rating: 4.2,
+            image: ""
+        },
+        {
+            id: 46,
+            name: "Federal Celesta",
+            type: "Credit Card",
+            color: "from-indigo-400 to-indigo-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "FEDERAL BANK",
+            benefits: [
+                "Premium Metal Card Experience",
+                "Up to 3X Reward Points on categories",
+                "Domestic & International Lounge visits",
+                "Buy 1 Get 1 on BMS movie tickets"
+            ],
+            bestFor: "Premium Banking Customers",
+            fee: "₹3,000 (Waived on ₹5L spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 47,
+            name: "IDFC First Private",
+            type: "Credit Card",
+            color: "from-slate-900 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "IDFC FIRST",
+            benefits: [
+                "Invite-only Metal Card",
+                "Unlimited Domestic & Global Lounges",
+                "Comprehensive Travel & Stay perks",
+                "World-class concierge services"
+            ],
+            bestFor: "Ultra High-Net Worth Group",
+            fee: "₹0 (Life Time Free / Invite)",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 48,
+            name: "SBI Octane",
+            type: "Credit Card",
+            color: "from-blue-900 to-slate-900",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "7.25% Value back on BPCL fuel spends",
+                "25 Reward points per ₹100 on dining",
+                "4 Complimentary Lounge visits yearly",
+                "Gift vouchers on annual milestones"
+            ],
+            bestFor: "Fuel & Commute Savers",
+            fee: "₹1,499 (Waived on ₹2L spend)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 49,
+            name: "SBI Aurum",
+            type: "Credit Card",
+            color: "from-yellow-600 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "SBI CARD",
+            benefits: [
+                "Invite-only Metal Card",
+                "Unlimited International & Domestic Lounges",
+                "4 Free Movie tickets monthly (BookMyShow)",
+                "Luxury Brand vouchers on milestones"
+            ],
+            bestFor: "Elite Lifestyle & Rewards",
+            fee: "₹9,999 (Waived on ₹12L spend)",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 50,
+            name: "Jupiter Edge CSB",
+            type: "Credit Card",
+            color: "from-blue-600 to-teal-400",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "CSB/JUPITER",
+            benefits: [
+                "Flat 2% Cashback on all spends via Jupiter App",
+                "Welcome vouchers worth ₹1,000",
+                "Zero joining fee for select users",
+                "Instant digital onboarding & control"
+            ],
+            bestFor: "Tech-savvy Shoppers",
+            fee: "₹0 (Life Time Free / Selective)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 51,
+            name: "Fi Federal Card",
+            type: "Credit Card",
+            color: "from-emerald-400 to-emerald-700",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "FEDERAL/FI",
+            benefits: [
+                "5X Rewards on top 3 brands of your choice",
+                "2% Value back on all other spends",
+                "Complimentary Lounge access",
+                "No hidden charges or paper statements"
+            ],
+            bestFor: "Modern Banking Experience",
+            fee: "₹2,000 (Waived on ₹2.5L spend)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 52,
+            name: "Axis Select",
+            type: "Credit Card",
+            color: "from-blue-700 to-blue-900",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "Priority Pass with 6 International visits",
+                "₹500 off on BigBasket every month",
+                "Buy 1 Get 1 movies on BookMyShow",
+                "Golf rounds & Concierge services"
+            ],
+            bestFor: "Premium Lifestyle & Groceries",
+            fee: "₹3,000 (Waived on ₹6L spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 53,
+            name: "ICICI Emeralde",
+            type: "Credit Card",
+            color: "from-slate-700 to-black",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "ICICI BANK",
+            benefits: [
+                "Unlimited Domestic & Global Lounges",
+                "Low Forex markup of 1.5%",
+                "Unlimited Spa & Golf access",
+                "No cancellation fee on travel bookings"
+            ],
+            bestFor: "Ultra High-Net Worth Group",
+            fee: "₹12,000 + GST",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 54,
+            name: "StandChart EaseMyTrip",
+            type: "Credit Card",
+            color: "from-blue-500 to-orange-500",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "STANDARD CHARTERED",
+            benefits: [
+                "Flat 20% off on Hotel bookings (EaseMyTrip)",
+                "Flat 10% off on Flight bookings",
+                "Earn 10x rewards on other travel portals",
+                "Complimentary Lounge access"
+            ],
+            bestFor: "Online Travel Bookings",
+            fee: "₹350 (Waived on ₹50k spend)",
+            rating: 4.6,
+            image: ""
+        },
+        {
+            id: 55,
+            name: "Yes Bank Reserv",
+            type: "Credit Card",
+            color: "from-slate-500 to-slate-700",
+            category: "Luxury",
+            country: "🇮🇳 India",
+            bank: "YES BANK",
+            benefits: [
+                "24 Reward Points per ₹200 on basic spends",
+                "Unlimited Lounge visits within India",
+                "8 International visits via Priority Pass",
+                "Golf rounds and Dining perks"
+            ],
+            bestFor: "High Reward Accumulation",
+            fee: "₹1,999 (Waived on criteria)",
+            rating: 4.4,
+            image: ""
+        },
+        {
+            id: 56,
+            name: "OneCard Lite",
+            type: "Credit Card",
+            color: "from-gray-500 to-gray-700",
+            category: "Student",
+            country: "🇮🇳 India",
+            bank: "BOB/SBM",
+            benefits: [
+                "No Income Proof (FD based)",
+                "Full Metal Card experience",
+                "Earn interest on your FD while spending",
+                "Start building credit history early"
+            ],
+            bestFor: "Students & Beginners",
+            fee: "₹0 (Always Free)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 57,
+            name: "Kotak Mojo",
+            type: "Credit Card",
+            color: "from-blue-800 to-black",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "KOTAK MAHINDRA",
+            benefits: [
+                "2.5 Mojo points per ₹100 online",
+                "1 Mojo point per ₹100 offline",
+                "8 Domestic Lounge visits per year",
+                "Annual fee waiver on ₹1L spend"
+            ],
+            bestFor: "Online Lifestyle Shopping",
+            fee: "₹1,000 (Waived on ₹1L spend)",
+            rating: 4.2,
+            image: ""
+        },
+        {
+            id: 58,
+            name: "Slice Card",
+            type: "Credit Card",
+            color: "from-purple-600 to-pink-600",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "SLICE/SBM",
+            benefits: [
+                "Instant 'Spark' offers on top brands",
+                "Simple repayment options (1/3rd pay)",
+                "No joining or hidden fees",
+                "Best for young urban professionals"
+            ],
+            bestFor: "Micro-credit & Cashback",
+            fee: "₹0 (Free Forever)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 59,
+            name: "IDFC First Millennia",
+            type: "Credit Card",
+            color: "from-red-600 to-indigo-900",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "IDFC FIRST",
+            benefits: [
+                "Up to 10X Reward Points on milestones",
+                "Buy 1 Get 1 movies on Paytm",
+                "Lounge access available",
+                "Interest-free cash withdrawals"
+            ],
+            bestFor: "Gen-Z & Lifestyle spends",
+            fee: "₹0 (Life Time Free)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 60,
+            name: "IDFC First SWYP",
+            type: "Credit Card",
+            color: "from-purple-400 to-indigo-600",
+            category: "Student",
+            country: "🇮🇳 India",
+            bank: "IDFC FIRST",
+            benefits: [
+                "Tailored for Youth & New earners",
+                "Exclusive brand discounts via SWYP",
+                "No processing fee on EMI",
+                "Modern vertical card design"
+            ],
+            bestFor: "First-time Card Users",
+            fee: "₹499 (Waived on ₹30k spend)",
+            rating: 4.5,
+            image: ""
+        },
+        {
+            id: 61,
+            name: "Axis Rewards",
+            type: "Credit Card",
+            color: "from-gray-700 to-slate-900",
+            category: "Shopping",
+            country: "🇮🇳 India",
+            bank: "AXIS BANK",
+            benefits: [
+                "10X Points on Departmental Stores",
+                "5,000 Edge points on joining",
+                "Domestic Lounge access",
+                "Dining and Movie discounts"
+            ],
+            bestFor: "Offline & Online Rewards",
+            fee: "₹1,000 (Waived on ₹2L spend)",
+            rating: 4.3,
+            image: ""
+        },
+        {
+            id: 62,
+            name: "Federal Signet",
+            type: "Credit Card",
+            color: "from-blue-400 to-blue-700",
+            category: "Personal",
+            country: "🇮🇳 India",
+            bank: "FEDERAL BANK",
+            benefits: [
+                "Buy 1 Get 1 on Inox movies",
+                "Reward points on every spend",
+                "Lounge access (selective)",
+                "Dining perks via Swiggy/Zomato"
+            ],
+            bestFor: "Daily Life & Entertainment",
+            fee: "₹750 (Waived on criteria)",
+            rating: 4.2,
+            image: ""
+        },
+        {
+            id: 63,
+            name: "BoB Premier",
+            type: "Credit Card",
+            color: "from-orange-500 to-red-800",
+            category: "Travel",
+            country: "🇮🇳 India",
+            bank: "BOB FINANCIAL",
+            benefits: [
+                "10 Reward Points per ₹100 on travel",
+                "1 Complimentary Lounge access per quarter",
+                "1% Fuel surcharge waiver",
+                "Simple milestone based fee waiver"
+            ],
+            bestFor: "Budget Friendly Travel",
+            fee: "₹1,000 (Waived on ₹1.2L spend)",
+            rating: 4.1,
+            image: ""
+        },
         // --- USA ---
         {
             id: 101,
@@ -733,6 +1303,63 @@ const CardDemo = () => {
             ],
             bestFor: "Luxury Travel & Lifestyle",
             fee: "$695 Annual Fee",
+            rating: 4.8,
+            image: ""
+        },
+        {
+            id: 103,
+            name: "Capital One Venture X",
+            type: "Credit Card",
+            color: "from-indigo-700 to-purple-900",
+            category: "Travel",
+            country: "🇺🇸 USA",
+            bank: "CAPITAL ONE",
+            benefits: [
+                "75,000 Bonus Miles on joining",
+                "10x miles on hotels and rental cars",
+                "$300 Annual Travel Credit",
+                "Unlimited Lounge visits globally"
+            ],
+            bestFor: "Modern Global Travelers",
+            fee: "$395 Annual Fee",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 104,
+            name: "Apple Card",
+            type: "Credit Card",
+            color: "from-white to-gray-200",
+            category: "Personal",
+            country: "🇺🇸 USA",
+            bank: "GOLDMAN SACHS / APPLE",
+            benefits: [
+                "3% Daily Cash on Apple products",
+                "2% Daily Cash when using Apple Pay",
+                "Titanium metal card with no numbers",
+                "Financial health tracker in Apple Wallet"
+            ],
+            bestFor: "Apple Ecosystem Users",
+            fee: "$0 Annual Fee",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 105,
+            name: "Bilt Rewards",
+            type: "Credit Card",
+            color: "from-black to-slate-800",
+            category: "Personal",
+            country: "🇺🇸 USA",
+            bank: "WELLS FARGO / BILT",
+            benefits: [
+                "Earn 1x points on Rent payments",
+                "3x on dining & 2x on travel",
+                "Points transferable to top airlines",
+                "Building credit through rent"
+            ],
+            bestFor: "Renters & Travelers",
+            fee: "$0 Annual Fee",
             rating: 4.8,
             image: ""
         },
@@ -773,6 +1400,25 @@ const CardDemo = () => {
             bestFor: "Credit Building & Students",
             fee: "£0 Annual Fee",
             rating: 4.4,
+            image: ""
+        },
+        {
+            id: 203,
+            name: "Revolut Metal",
+            type: "Credit Card",
+            color: "from-slate-600 to-black",
+            category: "Luxury",
+            country: "🇬🇧 UK",
+            bank: "REVOLUT",
+            benefits: [
+                "1% Cashback in any currency",
+                "Free Lounge access & Concierge",
+                "Unlimited Forex and Stock trading",
+                "Exclusive 18g reinforced metal card"
+            ],
+            bestFor: "Global Wealth & Fintech",
+            fee: "£12.99 / month",
+            rating: 4.9,
             image: ""
         },
 
