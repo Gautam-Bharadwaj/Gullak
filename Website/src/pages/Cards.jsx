@@ -104,6 +104,105 @@ const CardDemo = () => {
             fee: "$695 Annual Fee",
             rating: 4.8,
             image: ""
+        },
+        // --- UK ---
+        {
+            id: 201,
+            name: "Amex Gold UK",
+            type: "Credit Card",
+            color: "from-yellow-600 to-yellow-900",
+            category: "Travelers",
+            country: "🇬🇧 UK",
+            bank: "AMERICAN EXPRESS",
+            benefits: [
+                "20,000 Membership Rewards points bonus",
+                "2x points on flights & foreign currency",
+                "Two complimentary airport lounge visits",
+                "Deliveroo credits (£5 back twice a month)"
+            ],
+            bestFor: "Travel & Dining in UK",
+            fee: "£160 (Free in Year 1)",
+            rating: 4.7,
+            image: ""
+        },
+        {
+            id: 202,
+            name: "Barclaycard Forward",
+            type: "Credit Card",
+            color: "from-blue-400 to-blue-600",
+            category: "Students",
+            country: "🇬🇧 UK",
+            bank: "BARCLAYS",
+            benefits: [
+                "Designed for building credit history",
+                "0% interest on purchases for 3 months",
+                "Price drop on interest if you pay on time",
+                "No annual fee"
+            ],
+            bestFor: "Credit Building & Students",
+            fee: "£0 Annual Fee",
+            rating: 4.4,
+            image: ""
+        },
+
+        // --- UAE ---
+        {
+            id: 301,
+            name: "Emirates NBD Skywards Infinite",
+            type: "Credit Card",
+            color: "from-red-600 to-red-900",
+            category: "Luxury",
+            country: "🇦🇪 UAE",
+            bank: "EMIRATES NBD",
+            benefits: [
+                "Up to 100,000 Skywards Miles Welcome",
+                "Rotation of 50+ Global Airport Lounges",
+                "Rotana Rewards Exclusive Membership",
+                "Complimentary Golf access"
+            ],
+            bestFor: "Emirates High-Flyers",
+            fee: "AED 2,999 Annual Fee",
+            rating: 4.9,
+            image: ""
+        },
+        {
+            id: 228,
+            name: "HSBC Cashback",
+            type: "Credit Card",
+            color: "from-red-500 to-red-800",
+            category: "Personal",
+            country: "🇦🇪 UAE",
+            bank: "HSBC",
+            benefits: [
+                "10% Cashback on fuel and supermarkets",
+                "3% Cashback on online shopping",
+                "1% Cashback on all other spends",
+                "No minimum spend requirement"
+            ],
+            bestFor: "Everyday UAE Expenses",
+            fee: "AED 0 in Year 1",
+            rating: 4.6,
+            image: ""
+        },
+        // --- CANADA ---
+        {
+            id: 401,
+            name: "Scotiabank Gold Amex",
+            type: "Credit Card",
+            color: "from-red-700 to-red-900",
+            category: "Travelers",
+            country: "🇨🇦 Canada",
+            bank: "SCOTIABANK",
+            benefits: [
+                "6 Scene+ points per $1 at Sobeys/Safeway",
+                "No Foreign Transaction Fees",
+                "5 points per $1 on Dining & Entertainment",
+                "Comprehensive Travel Insurance"
+            ],
+            bestFor: "Groceries & International Travel",
+            fee: "$120 Annual Fee",
+            rating: 4.8,
+            image: ""
         }
     ];
 
