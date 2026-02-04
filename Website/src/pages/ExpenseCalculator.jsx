@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import { PieChart as RechartsPieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, Legend } from 'recharts';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const ExpenseCalculator = () => {
     const INITIAL_CATEGORIES = [
@@ -52,7 +54,7 @@ const ExpenseCalculator = () => {
             if (!user || !user.id) return; // Don't sync if not logged in
 
             try {
-                await fetch('/api/expenses', {
+                await fetch(`${API_URL}/api/expenses`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -76,7 +78,7 @@ const ExpenseCalculator = () => {
             if (!user || !user.id) return; // Don't fetch if not logged in
 
             try {
-                const res = await fetch(`/api/expenses?userId=${user.id}`);
+                const res = await fetch(`${API_URL}/api/expenses?userId=${user.id}`);
                 if (res.ok) {
                     const data = await res.json();
                     // Only update if backend has data (might be empty for new user)

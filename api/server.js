@@ -45,7 +45,24 @@ const sendEmail = async (to, subject, text) => {
 const mongoose = require('mongoose');
 const DB_FILE = path.join(__dirname, 'db.json');
 
-let db = { users: [], expenses: {}, searchHistory: [] };
+// Define User Schema for MongoDB
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    joined: { type: Date, default: Date.now },
+    twoFactorEnabled: { type: Boolean, default: false },
+    twoFactorSecret: { type: String, default: null },
+    expenses: {
+        items: { type: Array, default: [] },
+        income: { type: Number, default: 50000 },
+        updatedAt: { type: Date, default: Date.now }
+    }
+});
+
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
+let localDb = { users: [], expenses: {}, searchHistory: [] };
 
 // Initialize MongoDB or JSON File
 const initDB = async () => {
@@ -64,11 +81,11 @@ const initDB = async () => {
 
 const loadJSONDB = () => {
     if (!fs.existsSync(DB_FILE)) {
-        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+        fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
     } else {
         try {
             const data = fs.readFileSync(DB_FILE, 'utf8');
-            db = JSON.parse(data);
+            localDb = JSON.parse(data);
         } catch (err) {
             console.error("Error reading DB:", err);
         }
@@ -76,246 +93,283 @@ const loadJSONDB = () => {
     console.log(`JSON Database active at: ${DB_FILE}`);
 };
 
-const writeData = (data) => {
-    db = data;
-    if (!process.env.MONGODB_URI) {
-        fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-    }
-    // Note: In real app with MongoDB, you'd use Mongoose models instead of this writeData helper.
-};
-
-const readData = () => db;
-
 initDB();
 
 // --- API Routes ---
 
-// 0. Authentication
-
 // Signup
-app.post('/api/auth/signup', (req, res) => {
+app.post('/api/auth/signup', async (req, res) => {
     const { name, email, password } = req.body;
-    const db = readData();
 
-    if (db.users.find(u => u.email === email)) {
-        return res.status(400).json({ message: 'Email already exists' });
+    try {
+        if (process.env.MONGODB_URI) {
+            const existingUser = await User.findOne({ email });
+            if (existingUser) return res.status(400).json({ message: 'Email already exists' });
+
+            const newUser = new User({ name, email, password });
+            await newUser.save();
+            const { password: _, ...userWithoutPassword } = newUser.toObject();
+            return res.status(201).json({ message: 'User created successfully', user: userWithoutPassword });
+        } else {
+            // Local JSON Fallback
+            if (localDb.users.find(u => u.email === email)) {
+                return res.status(400).json({ message: 'Email already exists' });
+            }
+            const newUser = { id: Date.now().toString(), name, email, password, joined: new Date() };
+            localDb.users.push(newUser);
+            fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
+            return res.status(201).json({ message: 'User created (Local)', user: newUser });
+        }
+    } catch (err) {
+        res.status(500).json({ message: 'Signup error', error: err.message });
     }
-
-    const newUser = {
-        id: Date.now().toString(),
-        name,
-        email,
-        password, // In a real production app, you MUST hash this password!
-        joined: new Date().toISOString(),
-        twoFactorEnabled: false,
-        twoFactorSecret: null
-    };
-
-    db.users.push(newUser);
-
-    // Initialize empty expenses for the new user
-    db.expenses[newUser.id] = { expenses: [], income: 50000, updatedAt: new Date() };
-
-    writeData(db);
-
-    const { password: _, twoFactorSecret: __, ...userWithoutPassword } = newUser;
-    res.status(201).json({ message: 'User created successfully', user: userWithoutPassword });
 });
 
-// Login (Step 1)
-app.post('/api/auth/login', (req, res) => {
+// Login
+app.post('/api/auth/login', async (req, res) => {
     const { email, password } = req.body;
-    const db = readData();
 
-    const user = db.users.find(u => u.email === email && u.password === password);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findOne({ email, password });
+        } else {
+            user = localDb.users.find(u => u.email === email && u.password === password);
+        }
 
-    if (!user) {
-        return res.status(401).json({ message: 'Invalid credentials' });
+        if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+        if (user.twoFactorEnabled) {
+            return res.json({ message: '2FA Required', require2fa: true, userId: user._id || user.id });
+        }
+
+        sendEmail(email, "New Login Detected", "You just logged into your Gullak account.");
+        const { password: _, ...userWithoutPassword } = user.toObject ? user.toObject() : user;
+        res.json({ message: 'Login successful', user: userWithoutPassword });
+    } catch (err) {
+        res.status(500).json({ message: 'Login error' });
     }
-
-    // Check 2FA
-    if (user.twoFactorEnabled) {
-        return res.json({
-            message: '2FA Verification Required',
-            require2fa: true,
-            userId: user.id
-        });
-    }
-
-    sendEmail(email, "New Login Detected", "You just logged into your Gullak account.");
-
-    const { password: _, twoFactorSecret: __, ...userWithoutPassword } = user;
-    res.json({ message: 'Login successful', user: userWithoutPassword });
 });
 
 // Login (Step 2: Verify 2FA - App or Email OTP)
-app.post('/api/auth/login/2fa', (req, res) => {
+app.post('/api/auth/login/2fa', async (req, res) => {
     const { userId, token } = req.body;
-    const db = readData();
-    const user = db.users.find(u => u.id === userId);
-
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    let verified = false;
-
-    // Check 1: Time-based OTP (Google Authenticator)
-    if (user.twoFactorSecret) {
-        verified = speakeasy.totp.verify({
-            secret: user.twoFactorSecret,
-            encoding: 'base32',
-            token: token
-        });
-    }
-
-    // Check 2: Email OTP fallback
-    if (!verified && user.emailOtp && user.emailOtp === token) {
-        if (Date.now() < user.emailOtpExpires) {
-            verified = true;
-            delete user.emailOtp;        // Consume OTP
-            delete user.emailOtpExpires;
-            writeData(db);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findById(userId);
+        } else {
+            user = localDb.users.find(u => u.id === userId);
         }
-    }
 
-    if (verified) {
-        sendEmail(user.email, "Login Successful", "2FA Verification completed successfully.");
-        const { password: _, twoFactorSecret: __, ...userWithoutPassword } = user;
-        res.json({ message: 'Login successful', user: userWithoutPassword });
-    } else {
-        res.status(401).json({ message: 'Invalid 2FA Token' });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        let verified = false;
+
+        // Check 1: Time-based OTP (Google Authenticator)
+        if (user.twoFactorSecret) {
+            verified = speakeasy.totp.verify({
+                secret: user.twoFactorSecret,
+                encoding: 'base32',
+                token: token
+            });
+        }
+
+        // Check 2: Email OTP fallback
+        if (!verified && user.emailOtp && user.emailOtp === token) {
+            if (Date.now() < (user.emailOtpExpires || 0)) {
+                verified = true;
+                if (user.toObject) {
+                    user.emailOtp = undefined;
+                    user.emailOtpExpires = undefined;
+                    await user.save();
+                } else {
+                    delete user.emailOtp;
+                    delete user.emailOtpExpires;
+                    fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
+                }
+            }
+        }
+
+        if (verified) {
+            sendEmail(user.email, "Login Successful", "2FA Verification completed successfully.");
+            const { password: _, ...userWithoutPassword } = user.toObject ? user.toObject() : user;
+            res.json({ message: 'Login successful', user: userWithoutPassword });
+        } else {
+            res.status(401).json({ message: 'Invalid 2FA Token' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: '2FA error' });
     }
 });
 
 // Send Email OTP for 2FA
-app.post('/api/auth/login/2fa/send-email', (req, res) => {
+app.post('/api/auth/login/2fa/send-email', async (req, res) => {
     const { userId } = req.body;
-    const db = readData();
-    const user = db.users.find(u => u.id === userId);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findById(userId);
+        } else {
+            user = localDb.users.find(u => u.id === userId);
+        }
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit
-    user.emailOtp = otp;
-    user.emailOtpExpires = Date.now() + 5 * 60000; // 5 mins
-    writeData(db);
+        const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 digit
+        user.emailOtp = otp;
+        user.emailOtpExpires = Date.now() + 5 * 60000; // 5 mins
 
-    sendEmail(user.email, "Your 2FA Login Code", `Your verification code is: ${otp}`);
-    res.json({ message: 'OTP sent to email' });
+        if (user.save) await user.save();
+        else fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
+
+        sendEmail(user.email, "Your 2FA Login Code", `Your verification code is: ${otp}`);
+        res.json({ message: 'OTP sent to email' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error sending OTP' });
+    }
 });
 
 // 2FA Setup: Generate Secret & QR
-app.post('/api/auth/2fa/setup', (req, res) => {
+app.post('/api/auth/2fa/setup', async (req, res) => {
     const { userId } = req.body;
-    const db = readData();
-    const user = db.users.find(u => u.id === userId);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findById(userId);
+        } else {
+            user = localDb.users.find(u => u.id === userId);
+        }
 
-    if (!user) return res.status(404).json({ message: 'User not found' });
+        if (!user) return res.status(404).json({ message: 'User not found' });
 
-    const secret = speakeasy.generateSecret({ length: 20, name: `Gullak (${user.email})` });
+        const secret = speakeasy.generateSecret({ length: 20, name: `Gullak (${user.email})` });
+        user.tempSecret = secret.base32;
 
-    // Temporarily store the secret (or you could store pending secrets differently)
-    // Here we will rely on the client sending it back to verify, or save it to DB temporarily
-    // For simplicity, let's update the user but keep enabled=false until verified
+        if (user.save) await user.save();
+        else fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
 
-    user.tempSecret = secret.base32;
-    writeData(db);
-
-    QRCode.toDataURL(secret.otpauth_url, (err, data_url) => {
-        if (err) return res.status(500).json({ message: 'Error generating QR code' });
-        res.json({ secret: secret.base32, qrCode: data_url });
-    });
+        QRCode.toDataURL(secret.otpauth_url, (err, data_url) => {
+            if (err) return res.status(500).json({ message: 'Error generating QR code' });
+            res.json({ secret: secret.base32, qrCode: data_url });
+        });
+    } catch (err) {
+        res.status(500).json({ message: '2FA Setup error' });
+    }
 });
 
 // 2FA Setup: Verify & Enable
-app.post('/api/auth/2fa/verify', (req, res) => {
+app.post('/api/auth/2fa/verify', async (req, res) => {
     const { userId, token } = req.body;
-    const db = readData();
-    const user = db.users.find(u => u.id === userId);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findById(userId);
+        } else {
+            user = localDb.users.find(u => u.id === userId);
+        }
 
-    if (!user || !user.tempSecret) return res.status(400).json({ message: 'Setup not initialized' });
+        if (!user || !user.tempSecret) return res.status(400).json({ message: 'Setup not initialized' });
 
-    const verified = speakeasy.totp.verify({
-        secret: user.tempSecret,
-        encoding: 'base32',
-        token: token
-    });
+        const verified = speakeasy.totp.verify({
+            secret: user.tempSecret,
+            encoding: 'base32',
+            token: token
+        });
 
-    if (verified) {
-        user.twoFactorSecret = user.tempSecret;
-        user.twoFactorEnabled = true;
-        delete user.tempSecret;
-        writeData(db);
-        res.json({ message: 'Two-Factor Authentication Enabled Successfully' });
-    } else {
-        res.status(400).json({ message: 'Invalid Token. Please try again.' });
+        if (verified) {
+            user.twoFactorSecret = user.tempSecret;
+            user.twoFactorEnabled = true;
+            user.tempSecret = undefined;
+
+            if (user.save) await user.save();
+            else {
+                delete user.tempSecret;
+                fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
+            }
+            res.json({ message: 'Two-Factor Authentication Enabled Successfully' });
+        } else {
+            res.status(400).json({ message: 'Invalid Token. Please try again.' });
+        }
+    } catch (err) {
+        res.status(500).json({ message: 'Verification error' });
     }
 });
 
 // Forgot Password (Mock)
-app.post('/api/auth/forgot-password', (req, res) => {
+app.post('/api/auth/forgot-password', async (req, res) => {
     const { email } = req.body;
-    const db = readData();
-    const user = db.users.find(u => u.email === email);
+    try {
+        let user;
+        if (process.env.MONGODB_URI) {
+            user = await User.findOne({ email });
+        } else {
+            user = localDb.users.find(u => u.email === email);
+        }
 
-    if (!user) {
-        return res.status(404).json({ message: 'No account found with this email' });
+        if (!user) return res.status(404).json({ message: 'No account found with this email' });
+
+        console.log(`[AUTH] Password Reset for ${email}: ${user.password}`);
+        res.json({ message: 'Password recovery instruction sent (Check server console for demo)' });
+    } catch (err) {
+        res.status(500).json({ message: 'Error processing forgot password' });
     }
-
-    console.log(`[AUTH] Password Reset for ${email}: ${user.password}`);
-    res.json({ message: 'Password recovery instruction sent (Check server console for demo)' });
 });
 
 // 1. Search History (Global for now, can be made user-specific)
 app.get('/api/search/history', (req, res) => {
-    const db = readData();
-    res.json(db.searchHistory.slice(0, 10));
+    res.json(localDb.searchHistory.slice(0, 10));
 });
 
 app.post('/api/search/history', (req, res) => {
     const { query, timestamp } = req.body;
-    const db = readData();
-
     const newEntry = { id: Date.now().toString(), query, timestamp: timestamp || new Date() };
-    db.searchHistory = [newEntry, ...db.searchHistory].slice(0, 50);
-
-    writeData(db);
+    localDb.searchHistory = [newEntry, ...localDb.searchHistory].slice(0, 50);
+    if (!process.env.MONGODB_URI) fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
     res.status(201).json(newEntry);
 });
 
 // 2. Expense Data (User Specific)
 
 // Get Expenses
-app.get('/api/expenses', (req, res) => {
-    const userId = req.query.userId; // Expect userId in query param
-    const db = readData();
+app.get('/api/expenses', async (req, res) => {
+    const userId = req.query.userId;
+    try {
+        if (process.env.MONGODB_URI && userId) {
+            const user = await User.findById(userId);
+            if (user) return res.json(user.expenses || { items: [], income: 50000 });
+        }
 
-    if (!userId) {
-        // Fallback for backward compatibility or guest mode (returns global/first or empty)
-        // For now, let's return a default structure if no user
-        return res.json({ expenses: [], income: 0 });
+        // Local Fallback
+        const userData = localDb.expenses[userId] || { items: [], income: 50000 };
+        res.json(userData);
+    } catch (err) {
+        res.status(500).json({ message: 'Error fetching expenses' });
     }
-
-    const userData = db.expenses[userId] || { expenses: [], income: 50000 };
-    res.json(userData);
 });
 
 // Save Expenses
-app.post('/api/expenses', (req, res) => {
+app.post('/api/expenses', async (req, res) => {
     const { userId, expenses, income } = req.body;
+    if (!userId) return res.status(400).json({ message: 'User ID is required' });
 
-    if (!userId) {
-        return res.status(400).json({ message: 'User ID is required to save data' });
+    try {
+        if (process.env.MONGODB_URI) {
+            const user = await User.findById(userId);
+            if (user) {
+                user.expenses = { items: expenses, income, updatedAt: new Date() };
+                await user.save();
+                return res.status(200).json({ message: 'Saved to MongoDB', data: user.expenses });
+            }
+        }
+
+        // Local Fallback
+        localDb.expenses[userId] = { expenses, income, updatedAt: new Date() };
+        fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
+        res.status(200).json({ message: 'Saved to Local JSON', data: localDb.expenses[userId] });
+    } catch (err) {
+        res.status(500).json({ message: 'Save error' });
     }
-
-    const db = readData();
-    db.expenses[userId] = {
-        expenses,
-        income,
-        updatedAt: new Date().toISOString()
-    };
-
-    writeData(db);
-    res.status(200).json({ message: 'Saved successfully', data: db.expenses[userId] });
 });
 
 const { GoogleGenerativeAI } = require('@google/generative-ai');

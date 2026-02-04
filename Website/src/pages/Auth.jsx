@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, User, ArrowRight, Wallet, CheckCircle2, ShieldCheck, AlertTriangle, Smartphone, Eye, EyeOff } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 const Auth = () => {
     const [mode, setMode] = useState('login'); // 'login', 'signup', 'forgot', 'verify-2fa'
@@ -39,7 +41,11 @@ const Auth = () => {
                 body = { userId: tempUserId, token: formData.token };
             }
 
-            const res = await fetch(endpoint, {
+            // Ensure no double slashes, and trim trailing slash from API_URL
+            const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+            const fullUrl = `${baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
+
+            const res = await fetch(fullUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
@@ -47,7 +53,8 @@ const Auth = () => {
 
             const contentType = res.headers.get("content-type");
             if (!contentType || !contentType.includes("application/json")) {
-                throw new Error("Server is unreachable or offline. Please run 'npm run dev' from the root folder.");
+                console.error("Non-JSON Response from:", fullUrl);
+                throw new Error(`Connection Error: Your frontend is trying to connect to ${baseUrl}. If this is NOT your Render URL, you must add VITE_API_URL to Vercel.`);
             }
 
             const data = await res.json();
@@ -86,7 +93,7 @@ const Auth = () => {
         if (!tempUserId) return;
         setIsLoading(true);
         try {
-            const res = await fetch('/api/auth/login/2fa/send-email', {
+            const res = await fetch(`${API_URL}/api/auth/login/2fa/send-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: tempUserId })

@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import FinancialHealthScore from '../components/FinancialHealthScore';
 
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const Insights = () => {
     const [data, setData] = useState({ expenses: [], income: 0 });
     const [debtData, setDebtData] = useState([]);
@@ -14,7 +16,7 @@ const Insights = () => {
         const fetchData = async () => {
             try {
                 // Try backend first
-                const res = await fetch('/api/expenses');
+                const res = await fetch(`${API_URL}/api/expenses`);
                 if (res.ok) {
                     const backendData = await res.json();
                     if (backendData && backendData.expenses) {

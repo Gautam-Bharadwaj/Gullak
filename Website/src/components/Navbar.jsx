@@ -4,6 +4,9 @@ import { Link, useLocation } from 'react-router-dom';
 import GlobalSearch from './GlobalSearch';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -42,7 +45,7 @@ const Navbar = () => {
         setShow2FAModal(true);
 
         try {
-            const res = await fetch('/api/auth/2fa/setup', {
+            const res = await fetch(`${API_URL}/api/auth/2fa/setup`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user.id })
@@ -59,7 +62,7 @@ const Navbar = () => {
 
     const verify2FA = async () => {
         try {
-            const res = await fetch('/api/auth/2fa/verify', {
+            const res = await fetch(`${API_URL}/api/auth/2fa/verify`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: user.id, token })
@@ -147,8 +150,8 @@ const Navbar = () => {
                                                         start2FASetup();
                                                     }}
                                                     className={`p-2 rounded-full transition-all ${!user.twoFactorEnabled && !localStorage.getItem('gullak_2fa_seen')
-                                                            ? 'bg-red-500/20 text-red-500 animate-pulse'
-                                                            : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-primary'
+                                                        ? 'bg-red-500/20 text-red-500 animate-pulse'
+                                                        : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-primary'
                                                         }`}
                                                     title="Enable 2FA"
                                                 >

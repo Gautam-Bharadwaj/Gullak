@@ -3,6 +3,9 @@ import { Search, X, Clock, ArrowRight, Zap, TrendingUp, TrendingDown, Calculator
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const GlobalSearch = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -101,7 +104,7 @@ const GlobalSearch = () => {
         setRecentSearches(updated);
         localStorage.setItem('gullak_recent_searches', JSON.stringify(updated));
 
-        fetch('/api/search/history', {
+        fetch(`${API_URL}/api/search/history`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ query: item.title, timestamp: new Date() })
