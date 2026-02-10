@@ -14,6 +14,12 @@ const PORT = process.env.PORT || 5001;
 app.use(cors());
 app.use(express.json());
 
+// --- Naya Forgot Password Feature ---
+
+const forgotPasswordRouter = require('./forgotPassword');
+app.use('/api', forgotPasswordRouter);
+
+
 // --- Email Config ---
 const transporter = nodemailer.createTransport({
     service: 'gmail', // Use 'gmail' or your provider
@@ -474,7 +480,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Start Server
-app.listen(PORT, () => {
-    console.log(`Gullak Backend running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Gullak Backend running on http://0.0.0.0:${PORT}`);
     console.log(`Persistent storage active at: ${DB_FILE}`);
 });
