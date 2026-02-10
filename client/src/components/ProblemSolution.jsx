@@ -11,7 +11,7 @@ const ProblemSolution = () => {
     ];
 
     const solutions = [
-        "Actionable CA-style insights on every transaction",
+        "Actionable expert-style insights on every transaction",
         "EMI optimization engine to close loans early",
         "Automated 'Leak Detection' for lifestyle spending",
         "Designed specifically for the Indian Middle Class"

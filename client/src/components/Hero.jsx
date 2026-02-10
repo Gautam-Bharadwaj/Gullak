@@ -23,11 +23,11 @@ const Hero = () => {
 
                         <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight leading-tight mb-6">
                             Track Like a User,<br />
-                            <span className="text-gradient">Grow Like a CA.</span>
+                            <span className="text-gradient">Grow Like a Pro.</span>
                         </h1>
 
                         <p className="text-xl text-gray-400 mb-10 max-w-xl leading-relaxed">
-                            GULLAK isn't just an expense tracker. It’s your digital Chartered Accountant that detects money leaks, optimizes your EMIs, and builds your net worth—automatically.
+                            Gullak is more than just an expense tracker. Think of it as your personal financial partner that helps you spot hidden savings, manage your EMIs better, and grow your wealth automatically.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4">
@@ -86,7 +86,7 @@ const Hero = () => {
 
                                 <div className="space-y-3">
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-gray-400">CA Insight</span>
+                                        <span className="text-gray-400">Expert Insight</span>
                                         <span className="text-secondary font-medium">Suggestion</span>
                                     </div>
                                     <div className="p-4 rounded-xl bg-primary/5 border border-primary/20 text-sm leading-relaxed">
