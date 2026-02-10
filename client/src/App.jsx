@@ -8,6 +8,8 @@ import DebtOptimizer from './pages/DebtOptimizer';
 import Insights from './pages/Insights';
 import Auth from './pages/Auth';
 import Cards from './pages/Cards';
+import ForgotPassword from './components/ForgotPassword';
+import VerifyOtp from './components/VerifyOtp';
 
 import Footer from './components/Footer';
 import ScrollToTop from './components/ScrollToTop';
@@ -27,6 +29,8 @@ function App() {
             <Route path="/insights" element={<Insights />} />
             <Route path="/cards" element={<Cards />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/verify-otp" element={<VerifyOtp />} />
           </Routes>
         </main>
         <Footer />
