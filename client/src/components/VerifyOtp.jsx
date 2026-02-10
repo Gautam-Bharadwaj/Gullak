@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, ChevronRight, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
 
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const VerifyOtp = () => {
     const [email, setEmail] = useState('');
     const [otp, setOtp] = useState('');
@@ -17,7 +20,9 @@ const VerifyOtp = () => {
         setError('');
 
         try {
-            const res = await fetch('/api/verify-otp', {
+            // Ensure no double slashes, and trim trailing slash from API_URL
+            const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+            const res = await fetch(`${baseUrl}/api/verify-otp`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp, newPassword }),

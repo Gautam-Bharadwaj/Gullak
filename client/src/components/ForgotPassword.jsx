@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, ChevronRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 
+// API Configuration
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
+
 const ForgotPassword = () => {
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
@@ -15,7 +18,9 @@ const ForgotPassword = () => {
         setError('');
 
         try {
-            const res = await fetch('/api/forgot-password', {
+            // Ensure no double slashes, and trim trailing slash from API_URL
+            const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+            const res = await fetch(`${baseUrl}/api/forgot-password`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
