@@ -315,13 +315,12 @@ const Auth = () => {
 
                         {mode === 'login' && (
                             <div className="text-right">
-                                <button
-                                    type="button"
-                                    onClick={() => setMode('forgot')}
+                                <Link
+                                    to="/forgot-password"
                                     className="text-xs font-bold text-gray-500 hover:text-primary transition-colors uppercase tracking-widest"
                                 >
                                     Forgot Password?
-                                </button>
+                                </Link>
                             </div>
                         )}
 
