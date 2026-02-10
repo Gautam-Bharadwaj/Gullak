@@ -18,6 +18,7 @@ const Hero = () => {
                         transition={{ duration: 0.8, ease: "easeOut" }}
                     >
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold mb-6">
+                            <Sparkles size={16} />
                             <span>Smart Personal Finance Assistant</span>
                         </div>
 

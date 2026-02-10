@@ -44,7 +44,7 @@ const Footer = () => {
                 <div className="flex flex-col md:row justify-between items-center pt-8 border-t border-white/5 text-gray-500 text-sm gap-4">
                     <p>© 2026 GULLAK. All rights reserved.</p>
                     <div className="flex gap-8">
-                        <p>Made in Bharat | भारत में निर्मित</p>
+                        <p>Made in Bharat</p>
                     </div>
                 </div>
             </div>
