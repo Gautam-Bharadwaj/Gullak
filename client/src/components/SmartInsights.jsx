@@ -47,7 +47,6 @@ const SmartInsights = () => {
                     viewport={{ once: true }}
                 >
                     <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-4 tracking-widest uppercase">
-                        <Sparkles size={14} />
                         <span>Intelligence Engine</span>
                     </div>
                     <h2 className="text-4xl md:text-5xl font-black mb-6">
