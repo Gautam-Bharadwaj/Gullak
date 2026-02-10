@@ -4,8 +4,8 @@ services:
     name: gullak-backend
     env: node
     plan: free
-    buildCommand: npm install
-    startCommand: node api/server.js
+    buildCommand: cd server && npm install
+    startCommand: cd server && node server.js
     envVars:
       - key: NODE_VERSION
         value: 18.17.0
@@ -21,8 +21,8 @@ services:
     name: gullak-frontend
     env: static
     plan: free
-    buildCommand: cd Website && npm install && npm run build
-    staticPublishDir: Website/dist
+    buildCommand: cd client && npm install && npm run build
+    staticPublishDir: client/dist
     envVars:
       - key: VITE_API_URL
         fromService:
