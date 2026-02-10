@@ -1,131 +1,131 @@
 # Gullak - Intelligent Personal Finance Management
 
-**Gullak** is a sophisticated, digital financial assistant designed to bridge the gap between simple expense tracking and professional financial planning. Inspired by the analytical rigor of a Chartered Accountant, Gullak provides users with a comprehensive ecosystem to manage income, optimize debt, and build long-term wealth.
+Gullak is a professional financial assistant designed to bridge the gap between simple expense tracking and strategic financial planning. The platform provides a comprehensive ecosystem to manage income, optimize debt, and build long-term wealth through data-driven insights.
 
 ---
 
-## The Problem
+## Technical Overview
 
-In today's complex financial landscape, many individuals struggle to maintain financial health despite having adequate income. The challenges are often multifaceted:
+Gullak is built as a complete financial toolkit with a decoupled architecture, ensuring scalability and performance across web and mobile platforms.
 
-*   **Lack of Holistic Visibility**: Users typically check their bank balance to gauge financial health, failing to account for recurring liabilities, accrued interest, or net worth trends.
-*   **The Debt Trap**: Loans and EMIs are often taken without a clear understanding of the long-term interest burden. Users rarely visualize how small prepayments can save lakhs in interest.
-*   **Reactive vs. Proactive**: Most finance apps are reactive—they track where money *went*. They fail to tell users where money *should go* or alert them before they overspend.
-*   **Data Fragmentation**: Financial data is scattered across bank statements, loan portals, and investment apps, making it difficult to get a unified "big picture" view.
-
-## The Solution: Gullak
-
-Gullak addresses these challenges by moving beyond passive tracking to active management. It treats your personal finance like a business, offering tools and insights previously reserved for corporate finance management.
-
-### 1. The "Digital CA" Approach
-Unlike standard budget apps, Gullak analyzes your data to find inefficiencies. It doesn't just show you a chart of high expenses; it flags actionable insights, such as "Your dining out expense is 15% of your income, which is 5% higher than recommended."
-
-### 2. Strategic Debt Management
-We believe debt optimization is the quickest path to wealth creation. Our EMI Optimization engine allows users to model various repayment scenarios, visually demonstrating how increasing an EMI by even a small fraction can drastically reduce loan tenure and interest outgo.
-
-### 3. Unified Financial Ecosystem
-Gullak serves as a central repository for all financial data—assets, liabilities, income, and expenses—providing a true Net Worth calculation that updates in real-time as you log transactions or pay down debt.
+### Architecture
+- **Client**: A high-performance React 19 application built with Vite and Tailwind CSS.
+- **Server**: A robust Node.js and Express backend handling data persistence, authentication, and AI integrations.
+- **Mobile**: A cross-platform React Native application (Expo SDK 52) shared with the core business logic.
 
 ---
 
-## detailed Features
+## How it Works
 
-### Core Modules
+The platform operates through a seamless flow of data between the user interface and the analytical backend:
 
-#### 1. Advanced EMI & Debt Optimizer
-*   **Amortization Visualization**: Interactive charts showing the split between principal and interest for every payment.
-*   **Prepayment Impact Engine**: A simulator that calculates exactly how much money and time you save by making one-time or recurring extra payments.
-*   **Loan Comparison**: Tools to compare existing loans against current market offers to decide on balance transfers.
+### 1. Data Collection and Processing
+Users input financial data—including expenses, income sources, and loan details—through the React-based frontend. This data is validated in real-time and transmitted via secure REST APIs to the central server.
 
-#### 2. Intelligent Expense Tracking
-*   **Smart Categorization**: Expenses are categorized not just by type (Food, Travel) but by necessity (Needs vs. Wants), allowing for better budgeting.
-*   **Budget Guards**: Set strict or soft limits for categories. Receive visual alerts as you approach your thresholds.
-*   **Recurring Transaction Management**: Automated logging for fixed monthly expenses like rent, subscriptions, and utility bills.
+### 2. Intelligent Persistence
+The server employs a flexible storage strategy:
+- **Production Mode**: Connects to a MongoDB database for high-scale data management.
+- **Local/Development Mode**: Utilizes a persistent JSON-based file system (db.json) to ensure zero-configuration setup for new developers while maintaining data across sessions.
 
-#### 3. Financial Health Dashboard
-*   **Net Worth Tracker**: A real-time graph showing Total Assets minus Total Liabilities.
-*   **Financial Health Score**: An algorithmic score (0-100) derived from your savings rate, debt-to-income ratio, and spending consistency.
-*   **Monthly Reports**: Automated summaries at the end of each month highlighting achievements and areas for improvement.
+### 3. Expert Analysis Engine
+When a user requests financial insights:
+- The server aggregates historical spending patterns and debt structures.
+- It interfaces with the Gemini AI API to generate "Expert Advice," providing contextual recommendations on money leaks and saving opportunities.
+- The Debt Optimizer module executes mathematical algorithms to calculate amortization schedules and simulate prepayment impacts.
 
-#### 4. Knowledge & Learning Hub
-*   **Contextual Education**: If a user has high credit card debt, the app surfaces articles on "The Avalanche vs. Snowball Method" of debt repayment.
-*   **Curated Content**: Professional templates and guides for tax planning and investment basics.
-
----
-
-## Technical Architecture
-
-Gullak is built as a modern Monorepo, ensuring code sharing and consistency logic between the web and mobile platforms.
-
-### Web Application
-*   **Framework**: React 19 (via Vite) for high-performance rendering.
-*   **Routing**: React Router DOM v7 for seamless client-side navigation.
-*   **Design System**: Custom implementation of "Glassmorphism" using Tailwind CSS v4. It features translucent layers, vivid gradients, and sophisticated blur effects to create a premium, immersive user interface.
-*   **Visualizations**: Recharts integration for responsive, data-rich financial charts.
-
-### Mobile Application
-*   **Framework**: React Native (Expo SDK 52) ensuring native performance on iOS and Android.
-*   **Styling**: NativeWind (Tailwind for React Native) to maintain design consistency with the web platform.
-*   **Navigation**: React Navigation v7 with a custom bottom-tab layout.
-*   **Haptics**: Integrated tactile feedback for interactions to enhance the premium feel.
+### 4. Security Layer
+Account security is managed through a multi-tier authentication system:
+- Standard credential-based login.
+- Two-Factor Authentication (2FA) utilizing TOTP (Time-based One-Time Passwords) via apps like Google Authenticator.
+- Fallback Email OTP (One-Time Password) systems for recovery and verification.
 
 ---
 
-## New Features (Latest Update)
-*   **Express Backend**: Data is now synced to a Node.js backend (`/api`) for persistence across sessions.
-*   **Two-Factor Authentication (2FA)**: Secure logic with Google Authenticator and Email OTP fallback.
-*   **Global Search**: Integrated `Cmd+K` style search for tools, features, and financial guides.
-*   **Intelligent Caching**: Uses a dual-layer approach (localStorage + Backend) for "Fast Load" performance.
-*   **Real-time Sync**: Expense data is automatically debounced and saved to the server.
+## Core Features
+
+### Advanced Debt Optimizer
+- Amortization Visualization: Detailed breakdown of principal vs. interest payments.
+- Prepayment Simulator: Real-time calculation of interest and time savings from extra payments.
+- Repayment Roadmap: Algorithmic prioritization of loans using Avalanche or Snowball methods.
+
+### Intelligent Expense Tracking
+- Modern Dashboard: Real-time visibility into cash flow and spending categories.
+- Leak Detection: Automated identification of unused subscriptions and inefficient spending habits.
+- Financial Health Score: A proprietary metric calculated from savings rates and debt-to-income ratios.
+
+---
+
+## Directory Structure
+
+```text
+.
+├── client/           # React + Vite Web Frontend
+├── server/           # Node.js + Express Backend
+├── App/              # Expo + React Native Mobile Application
+├── render.yaml       # Infrastructure as Code for Deployment
+└── vercel.json       # Frontend Deployment Configuration
+```
 
 ---
 
 ## Getting Started
 
 ### Prerequisites
-*   **Node.js**: Version 18.0.0 or higher.
-*   **Package Manager**: npm or yarn.
-*   **Database**: Optional MongoDB (runs in-memory by default).
+- Node.js (Version 18.0.0 or higher)
+- npm or yarn
 
-### Setup Instructions
+### Installation
 
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/Gautam-Bharadwaj/Gullak.git
-    cd Gullak
-    ```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Gautam-Bharadwaj/Gullak.git
+   cd Gullak
+   ```
 
-2.  **Install Global Dependencies**
-    ```bash
-    npm install
-    ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-3.  **Running the Platform (Unified)**
-    ```bash
-    # This starts both the Website (Frontend) and the API (Backend)
-    npm run dev
-    ```
-    *   **Frontend**: `http://localhost:5173`
-    *   **Backend**: `http://localhost:5001`
+3. Configure environment variables in the server directory:
+   ```bash
+   # Create server/.env with:
+   PORT=5001
+   MONGODB_URI=your_mongodb_uri
+   GEMINI_API_KEY=your_api_key
+   EMAIL_USER=your_email
+   EMAIL_PASS=your_app_password
+   ```
 
-4.  **Running the Mobile Application**
-    ```bash
-    cd App
-    npm install
-    npx expo start
-    ```
+### Running the Platform
+
+To start the full stack (Frontend and Backend) simultaneously:
+```bash
+npm run dev
+```
+- Web Frontend: http://localhost:5173
+- API Backend: http://localhost:5001
+
+To run the mobile application:
+```bash
+cd App
+npm install
+npx expo start
+```
+
+---
+
+## Deployment
+
+The platform is designed for automated deployment:
+- **Backend**: Pre-configured for Render via `render.yaml`.
+- **Frontend**: Optimized for Vercel via `vercel.json`.
 
 ---
 
 ## Contribution Guidelines
 
-We follow a strict professional workflow for contributions:
-
-1.  **Fork** the repository.
-2.  **Create a Branch** for your feature (`git checkout -b feature/NewModule`).
-3.  **Commit** your changes with descriptive messages.
-4.  **Push** to your branch and open a **Pull Request**.
-
-Please ensure all new components adhere to the Glassmorphism design system guidelines found in `index.css`.
-
----
+1. Fork the repository.
+2. Create a feature branch (git checkout -b feature/name).
+3. Commit changes with professional descriptions.
+4. Push to the branch and open a Pull Request.
