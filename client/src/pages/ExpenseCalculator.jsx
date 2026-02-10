@@ -487,7 +487,7 @@ const ExpenseCalculator = () => {
                                         <div className="p-1.5 rounded-lg bg-white/5 group-hover:bg-primary/10 transition-colors">
                                             <Brain size={16} className={showAI ? 'text-primary' : ''} />
                                         </div>
-                                        Analyze with AI Munshi
+                                        Analyze with AI Advisor
                                     </button>
                                 </div>
                                 <div className="text-right">
@@ -511,10 +511,10 @@ const ExpenseCalculator = () => {
                                             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                                                 <div className="flex items-center gap-3">
                                                     <div className="p-2 rounded-lg bg-primary/20">
-                                                        <Sparkles className="text-primary" size={20} />
+                                                        <Brain className="text-primary" size={20} />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-black text-xs uppercase tracking-[0.2em] text-primary">AI Munshi's Counsel</h4>
+                                                        <h4 className="font-black text-xs uppercase tracking-[0.2em] text-primary">AI Advisor's Counsel</h4>
                                                         <p className="text-gray-400 text-[10px] font-bold">Analysis based on your current cash flow</p>
                                                     </div>
                                                 </div>

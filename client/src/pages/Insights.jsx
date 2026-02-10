@@ -187,7 +187,7 @@ const Insights = () => {
                         </div>
                     </div>
 
-                    {/* Right Side: AI Munshi recommendations */}
+                    {/* Right Side: AI Advisor recommendations */}
                     <div className="lg:col-span-4 space-y-6">
                         <div className="glass p-8 rounded-[2.5rem] bg-gradient-to-br from-primary/10 to-transparent border-primary/20">
                             <h3 className="text-xl font-black mb-6 flex items-center gap-2 underline decoration-primary decoration-4 underline-offset-8">
