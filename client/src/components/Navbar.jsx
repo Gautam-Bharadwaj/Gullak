@@ -78,7 +78,7 @@ const Navbar = () => {
 
                 setTimeout(() => {
                     setShow2FAModal(false);
-                }, 2000);
+                }, 3000);
             } else {
                 alert("Invalid Code. Please try again.");
             }
@@ -144,19 +144,28 @@ const Navbar = () => {
 
                                         <div className="flex gap-2">
                                             <div className="relative">
-                                                <button
-                                                    onClick={() => {
-                                                        localStorage.setItem('gullak_2fa_seen', 'true');
-                                                        start2FASetup();
-                                                    }}
-                                                    className={`p-2 rounded-full transition-all ${!user.twoFactorEnabled && !localStorage.getItem('gullak_2fa_seen')
-                                                        ? 'bg-red-500/20 text-red-500 animate-pulse'
-                                                        : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-primary'
-                                                        }`}
-                                                    title="Enable 2FA"
-                                                >
-                                                    <ShieldCheck size={20} />
-                                                </button>
+                                                {user.twoFactorEnabled ? (
+                                                    <div
+                                                        className="p-2 rounded-full bg-green-500/10 text-green-500 border border-green-500/20"
+                                                        title="Account Secured"
+                                                    >
+                                                        <ShieldCheck size={20} />
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => {
+                                                            localStorage.setItem('gullak_2fa_seen', 'true');
+                                                            start2FASetup();
+                                                        }}
+                                                        className={`p-2 rounded-full transition-all ${!user.twoFactorEnabled && !localStorage.getItem('gullak_2fa_seen')
+                                                            ? 'bg-red-500/20 text-red-500 animate-pulse'
+                                                            : 'bg-white/5 hover:bg-white/10 text-gray-400 hover:text-primary'
+                                                            }`}
+                                                        title="Enable 2FA"
+                                                    >
+                                                        <ShieldCheck size={20} />
+                                                    </button>
+                                                )}
 
                                                 {/* 2FA Nudge Tooltip */}
                                                 {!user.twoFactorEnabled && !localStorage.getItem('gullak_2fa_seen') && (
@@ -321,13 +330,27 @@ const Navbar = () => {
                                 </div>
                             ) : (
                                 <div className="text-center py-8">
-                                    <div className="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500">
-                                        <Check size={32} />
-                                    </div>
-                                    <h4 className="text-lg font-bold text-white">You're All Set!</h4>
-                                    <p className="text-sm text-gray-400 mt-2">
-                                        Two-factor authentication is now enabled on your account.
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="w-20 h-20 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-6 text-green-500 shadow-[0_0_30px_rgba(34,197,94,0.3)]"
+                                    >
+                                        <Check size={40} />
+                                    </motion.div>
+                                    <h4 className="text-2xl font-black text-white mb-3">Victory!</h4>
+                                    <p className="text-sm text-gray-400">
+                                        Your account is now <span className="text-green-400 font-bold uppercase tracking-widest text-[10px]">fully secured</span>.
                                     </p>
+                                    <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-center gap-3">
+                                        <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                                            <ShieldCheck size={12} className="text-primary" />
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">End-to-End Encryption</span>
+                                        </div>
+                                        <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                                            <Lock size={12} className="text-primary" />
+                                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Data Private</span>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
                         </motion.div>

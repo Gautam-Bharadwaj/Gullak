@@ -16,8 +16,14 @@ const Auth = () => {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
 
+    React.useEffect(() => {
+        const savedUser = localStorage.getItem('gullak_user');
+        if (savedUser) {
+            navigate('/');
+        }
+    }, [navigate]);
+
     const handleSubmit = async (e) => {
-        // ... (existing logic) ...
         e.preventDefault();
         setIsLoading(true);
         setError('');
@@ -34,14 +40,13 @@ const Auth = () => {
                 endpoint = '/api/auth/signup';
                 body = formData;
             } else if (mode === 'forgot') {
-                endpoint = '/api/auth/forgot-password';
+                endpoint = '/api/forgot-password';
                 body = { email: formData.email };
             } else if (mode === 'verify-2fa') {
                 endpoint = '/api/auth/login/2fa';
                 body = { userId: tempUserId, token: formData.token };
             }
 
-            // Ensure no double slashes, and trim trailing slash from API_URL
             const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
             const fullUrl = `${baseUrl}${endpoint.startsWith('/') ? endpoint : '/' + endpoint}`;
 
@@ -50,12 +55,6 @@ const Auth = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body)
             });
-
-            const contentType = res.headers.get("content-type");
-            if (!contentType || !contentType.includes("application/json")) {
-                console.error("Non-JSON Response from:", fullUrl);
-                throw new Error(`Connection Error: Your frontend is trying to connect to ${baseUrl}. If this is NOT your Render URL, you must add VITE_API_URL to Vercel.`);
-            }
 
             const data = await res.json();
 
@@ -83,12 +82,7 @@ const Auth = () => {
                 completeLogin(data.user);
             }
         } catch (err) {
-            const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
-            if (err.message === 'Failed to fetch') {
-                setError(`Connection Error: Trying to reach ${baseUrl}. Please check VITE_API_URL in Vercel settings.`);
-            } else {
-                setError(err.message);
-            }
+            setError(err.message);
         } finally {
             setIsLoading(false);
         }
@@ -124,8 +118,7 @@ const Auth = () => {
     };
 
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center p-4 pt-28">
-            {/* Background Decorations */}
+        <div className="min-h-screen bg-background flex items-center justify-center p-4 pt-28 text-white">
             <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/10 rounded-full blur-[100px] -z-10"></div>
             <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-secondary/10 rounded-full blur-[100px] -z-10"></div>
 
@@ -137,7 +130,6 @@ const Auth = () => {
                 {/* Left Side: Brand/Info */}
                 <div className="hidden md:flex flex-col justify-between p-12 bg-primary/5 border-r border-white/5 relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5"></div>
-
                     <div className="relative z-10">
                         <Link to="/" className="flex flex-col leading-none mb-12">
                             <span className="text-[13px] font-bold text-primary tracking-widest -mb-1">मेरा</span>
@@ -147,11 +139,9 @@ const Auth = () => {
                                 <span className="text-sm text-primary lowercase self-end mb-1 ml-0.5 font-bold opacity-90">.com</span>
                             </span>
                         </Link>
-
                         <h2 className="text-4xl font-black leading-tight mb-6">
-                            Start your journey to <span className="text-gradient">Financial Freedom.</span>
+                            Start your journey to <span className="text-primary text-gradient">Financial Freedom.</span>
                         </h2>
-
                         <div className="space-y-4 text-gray-400">
                             <div className="flex items-center gap-3">
                                 <CheckCircle2 className="text-secondary" size={20} />
@@ -165,14 +155,6 @@ const Auth = () => {
                                 <ShieldCheck className="text-secondary" size={20} />
                                 <span className="text-sm font-medium">Bank-level Data Security</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <div className="relative z-10 p-6 glass rounded-2xl border-white/10 bg-white/5">
-                        <p className="text-xs text-gray-500 italic mb-2">"Gullak changed how I look at my salary. I saved 2L in interest in just 4 months."</p>
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-primary/20"></div>
-                            <span className="text-[10px] font-bold text-white uppercase tracking-widest">Aditya K. • Verified User</span>
                         </div>
                     </div>
                 </div>
@@ -208,83 +190,125 @@ const Auth = () => {
                         )}
 
                         <AnimatePresence mode="wait">
-                            {/* Signup Name Field */}
                             {mode === 'signup' && (
                                 <motion.div
-                                    key="signup-name"
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: 'auto' }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    className="relative"
+                                    key="signup-fields"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-5"
                                 >
-                                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                                    <input
-                                        type="text"
-                                        required
-                                        placeholder="Full Name"
-                                        value={formData.name}
-                                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
-                                    />
-                                </motion.div>
-                            )}
-
-                            {/* Standard Email/Password Fields (Hidden for 2FA) */}
-                            {mode !== 'verify-2fa' && (
-                                <motion.div
-                                    key="standard-fields"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                >
-                                    <div className="relative mb-5">
+                                    <div className="relative">
+                                        <User className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                        <input
+                                            type="text"
+                                            required
+                                            placeholder="Full Name"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                    <div className="relative">
                                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
                                         <input
                                             type="email"
-                                            required={mode !== 'verify-2fa'}
+                                            required
                                             placeholder="Email Address"
                                             value={formData.email}
                                             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                             className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
                                         />
                                     </div>
-
-                                    {mode !== 'forgot' && (
-                                        <div className="relative">
-                                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
-                                            <input
-                                                type={showPassword ? "text" : "password"}
-                                                required={mode !== 'verify-2fa'}
-                                                placeholder="Password"
-                                                value={formData.password}
-                                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600 hover:text-primary transition-colors"
-                                            >
-                                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                                            </button>
-                                        </div>
-                                    )}
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            placeholder="Password"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
                                 </motion.div>
                             )}
 
+                            {mode === 'login' && (
+                                <motion.div
+                                    key="login-fields"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-5"
+                                >
+                                    <div className="relative">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="Email Address"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                    <div className="relative">
+                                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                        <input
+                                            type={showPassword ? "text" : "password"}
+                                            required
+                                            placeholder="Password"
+                                            value={formData.password}
+                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-600"
+                                        >
+                                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            )}
 
-                            // ... (existing helper functions) ...
+                            {mode === 'forgot' && (
+                                <motion.div
+                                    key="forgot-fields"
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
+                                    className="space-y-5"
+                                >
+                                    <div className="relative">
+                                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600" size={18} />
+                                        <input
+                                            type="email"
+                                            required
+                                            placeholder="Email Address"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-primary transition-all text-sm font-medium"
+                                        />
+                                    </div>
+                                </motion.div>
+                            )}
 
-                            return (
-                            // ... (existing JSX structure) ...
-
-                            {/* 2FA Token Field */}
                             {mode === 'verify-2fa' && (
                                 <motion.div
                                     key="2fa-field"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.95 }}
                                     className="relative"
                                 >
                                     <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-primary" size={18} />
@@ -295,24 +319,12 @@ const Auth = () => {
                                         placeholder="000 000"
                                         value={formData.token}
                                         onChange={(e) => setFormData({ ...formData, token: e.target.value.replace(/\D/g, '') })}
-                                        className="w-full bg-white/5 border border-primary/50 rounded-2xl py-4 pl-12 pr-4 text-white text-xl tracking-[0.5em] font-mono text-center focus:outline-none focus:border-primary transition-all shadow-[0_0_20px_rgba(255,215,0,0.1)]"
+                                        className="w-full bg-white/5 border border-primary/50 rounded-2xl py-4 pl-12 pr-4 text-white text-xl tracking-[0.5em] font-mono text-center focus:outline-none focus:border-primary transition-all"
                                     />
-
                                     <div className="text-center mt-4">
-                                        <p className="text-xs text-gray-400 mb-2">Can't access your authenticator app?</p>
-                                        {!emailOtpSent ? (
-                                            <button
-                                                type="button"
-                                                onClick={handleSendEmailOtp}
-                                                className="text-xs font-bold text-primary hover:text-white transition-colors underline decoration-dotted underline-offset-4"
-                                            >
-                                                Send Code via Email
-                                            </button>
-                                        ) : (
-                                            <span className="text-xs font-bold text-green-400 flex items-center justify-center gap-1">
-                                                <CheckCircle2 size={12} /> Code sent to email
-                                            </span>
-                                        )}
+                                        <button type="button" onClick={handleSendEmailOtp} className="text-xs font-bold text-primary underline">
+                                            {emailOtpSent ? 'Code Sent' : 'Send Code via Email'}
+                                        </button>
                                     </div>
                                 </motion.div>
                             )}
@@ -320,10 +332,7 @@ const Auth = () => {
 
                         {mode === 'login' && (
                             <div className="text-right">
-                                <Link
-                                    to="/forgot-password"
-                                    className="text-xs font-bold text-gray-500 hover:text-primary transition-colors uppercase tracking-widest"
-                                >
+                                <Link to="/forgot-password" size="sm" className="text-xs font-bold text-gray-500 hover:text-primary transition-colors uppercase tracking-widest">
                                     Forgot Password?
                                 </Link>
                             </div>
@@ -332,15 +341,11 @@ const Auth = () => {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-primary text-background py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-primary/10 disabled:opacity-50"
+                            className="w-full bg-primary text-black py-4 rounded-2xl font-black text-sm flex items-center justify-center gap-2 hover:scale-[1.02] transition-all disabled:opacity-50"
                         >
-                            {isLoading ? (
-                                <div className="w-5 h-5 border-2 border-background border-t-transparent rounded-full animate-spin"></div>
-                            ) : (
+                            {isLoading ? "Loading..." : (
                                 <>
-                                    {mode === 'login' ? 'Login to Vault' :
-                                        mode === 'signup' ? 'Secure my Gullak' :
-                                            mode === 'verify-2fa' ? 'Verify Authenticator' : 'Send Reset Link'}
+                                    {mode === 'login' ? 'Login to Vault' : mode === 'signup' ? 'Secure my Gullak' : mode === 'verify-2fa' ? 'Verify' : 'Send Reset Link'}
                                     <ArrowRight size={18} />
                                 </>
                             )}
@@ -348,21 +353,12 @@ const Auth = () => {
                     </form>
 
                     <p className="mt-10 text-center text-sm text-gray-500">
-                        {mode === 'login' ? "First time here?" :
-                            mode === 'verify-2fa' ? "Lost your device?" : "Remembered your password?"}
-
+                        {mode === 'login' ? "First time here?" : "Back to"}
                         <button
-                            onClick={() => {
-                                if (mode === 'verify-2fa') {
-                                    alert("Contact support at support@gullak.com to reset your 2FA.");
-                                } else {
-                                    setMode(mode === 'login' ? 'signup' : 'login');
-                                }
-                            }}
-                            className="ml-2 text-primary font-bold hover:underline"
+                            onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
+                            className="ml-2 text-primary font-bold"
                         >
-                            {mode === 'login' ? 'Create Account' :
-                                mode === 'verify-2fa' ? 'Get Help' : 'Back to Login'}
+                            {mode === 'login' ? 'Create Account' : 'Login'}
                         </button>
                     </p>
                 </div>

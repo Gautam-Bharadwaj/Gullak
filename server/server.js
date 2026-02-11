@@ -5,7 +5,8 @@ const path = require('path');
 const speakeasy = require('speakeasy');
 const QRCode = require('qrcode');
 const nodemailer = require('nodemailer');
-require('dotenv').config();
+const bcrypt = require('bcryptjs');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -114,7 +115,8 @@ app.post('/api/auth/signup', async (req, res) => {
             const existingUser = await User.findOne({ email });
             if (existingUser) return res.status(400).json({ message: 'Email already exists' });
 
-            const newUser = new User({ name, email, password });
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = new User({ name, email, password: hashedPassword });
             await newUser.save();
             const { password: _, ...userWithoutPassword } = newUser.toObject();
             return res.status(201).json({ message: 'User created successfully', user: userWithoutPassword });
@@ -123,7 +125,8 @@ app.post('/api/auth/signup', async (req, res) => {
             if (localDb.users.find(u => u.email === email)) {
                 return res.status(400).json({ message: 'Email already exists' });
             }
-            const newUser = { id: Date.now().toString(), name, email, password, joined: new Date() };
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newUser = { id: Date.now().toString(), name, email, password: hashedPassword, joined: new Date() };
             localDb.users.push(newUser);
             fs.writeFileSync(DB_FILE, JSON.stringify(localDb, null, 2));
             return res.status(201).json({ message: 'User created (Local)', user: newUser });
@@ -140,12 +143,16 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         let user;
         if (process.env.MONGODB_URI) {
-            user = await User.findOne({ email, password });
+            user = await User.findOne({ email });
         } else {
-            user = localDb.users.find(u => u.email === email && u.password === password);
+            user = localDb.users.find(u => u.email === email);
         }
 
         if (!user) return res.status(401).json({ message: 'Invalid credentials' });
+
+        // Check password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
         if (user.twoFactorEnabled) {
             return res.json({ message: '2FA Required', require2fa: true, userId: user._id || user.id });
@@ -316,25 +323,7 @@ app.post('/api/auth/2fa/verify', async (req, res) => {
     }
 });
 
-// Forgot Password (Mock)
-app.post('/api/auth/forgot-password', async (req, res) => {
-    const { email } = req.body;
-    try {
-        let user;
-        if (process.env.MONGODB_URI) {
-            user = await User.findOne({ email });
-        } else {
-            user = localDb.users.find(u => u.email === email);
-        }
-
-        if (!user) return res.status(404).json({ message: 'No account found with this email' });
-
-        console.log(`[AUTH] Password Reset for ${email}: ${user.password}`);
-        res.json({ message: 'Password recovery instruction sent (Check server console for demo)' });
-    } catch (err) {
-        res.status(500).json({ message: 'Error processing forgot password' });
-    }
-});
+// Forgot Password route is now handled by the imported forgotPasswordRouter mounted at /api
 
 // 1. Search History (Global for now, can be made user-specific)
 app.get('/api/search/history', (req, res) => {

@@ -9,7 +9,6 @@ const mongoose = require('mongoose');
 const DB_FILE = path.join(__dirname, 'db.json');
 
 // --- Helper: Get Transporter ---
-// We create it inside the route or helper to ensure it uses the latest process.env
 const getTransporter = () => {
     return nodemailer.createTransport({
         service: 'gmail',
@@ -58,6 +57,25 @@ router.post('/forgot-password', async (req, res) => {
             return res.status(404).json({ message: 'No account found with this email. Please check your spelling or register first.' });
         }
 
+        // Check for missing SMTP credentials
+        const emailUser = process.env.EMAIL_USER;
+        const emailPass = process.env.EMAIL_PASS;
+
+        if (!emailUser || !emailPass || emailUser === 'your-email@gmail.com') {
+            const errorMsg = "SMTP Credentials (EMAIL_USER/PASS) are not configured. Please set them in your .env file.";
+            console.error(`[FORGOT_PASSWORD] ${errorMsg}`);
+            console.log(`[DEBUG] EMAIL_USER is: ${emailUser || 'EMPTY/MISSING'}`);
+
+            if (process.env.NODE_ENV === 'development') {
+                console.log(`[DEV ONLY] OTP for ${email}: ${otp}`);
+                return res.status(200).json({
+                    message: 'Development Mode: OTP logged to server console.',
+                    devOtp: otp
+                });
+            }
+            throw new Error(errorMsg);
+        }
+
         // Store OTP
         if (isMongo) {
             user.resetOtp = otp;
@@ -96,10 +114,6 @@ router.post('/forgot-password', async (req, res) => {
             `
         };
 
-        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-            throw new Error("SMTP Credentials (EMAIL_USER/PASS) missing in Server Environment.");
-        }
-
         await transporter.sendMail(mailOptions);
         res.json({ message: 'Success! OTP sent to your email.' });
 
@@ -107,7 +121,7 @@ router.post('/forgot-password', async (req, res) => {
         console.error("Forgot Password Fatal Error:", err);
         res.status(500).json({
             message: `Server Error: ${err.message}`,
-            details: "Please check if your EMAIL_USER and EMAIL_PASS are correctly set in Render dashboard."
+            details: "Ensure EMAIL_USER and EMAIL_PASS (App Password) are correctly set."
         });
     }
 });
