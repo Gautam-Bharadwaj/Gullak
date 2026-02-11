@@ -8,20 +8,6 @@ const mongoose = require('mongoose');
 
 const DB_FILE = path.join(__dirname, 'db.json');
 
-// --- User Schema for MongoDB (Mirror of server.js) ---
-const userSchema = new mongoose.Schema({
-    name: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    joined: { type: Date, default: Date.now },
-    twoFactorEnabled: { type: Boolean, default: false },
-    twoFactorSecret: { type: String, default: null },
-    resetOtp: { type: String, default: null },
-    resetOtpExpires: { type: Date, default: null }
-});
-
-const User = mongoose.models.User || mongoose.model('User', userSchema);
-
 // --- Email Transporter ---
 const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -53,7 +39,8 @@ router.post('/forgot-password', async (req, res) => {
 
     try {
         if (process.env.MONGODB_URI) {
-            // MongoDB Path
+            // MongoDB Path - Use the model registered in server.js
+            const User = mongoose.model('User');
             const user = await User.findOne({ email });
             if (!user) return res.status(404).json({ message: 'User not found with this email' });
 
@@ -97,7 +84,10 @@ router.post('/forgot-password', async (req, res) => {
 
     } catch (err) {
         console.error("Forgot Password Error:", err);
-        res.status(500).json({ message: 'Error processing request', error: err.message });
+        res.status(500).json({
+            message: `Error: ${err.message}`, // Expose detailed error for debugging
+            error: err.message
+        });
     }
 });
 
@@ -108,7 +98,7 @@ router.post('/verify-otp', async (req, res) => {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
 
         if (process.env.MONGODB_URI) {
-            const user = await User.findOne({ email });
+            const user = await mongoose.model('User').findOne({ email });
             if (!user || user.resetOtp !== otp || Date.now() > user.resetOtpExpires) {
                 return res.status(400).json({ message: 'Invalid or expired OTP' });
             }
@@ -129,7 +119,7 @@ router.post('/verify-otp', async (req, res) => {
         }
         res.json({ message: 'Password reset successful!' });
     } catch (err) {
-        res.status(500).json({ message: 'Reset error' });
+        res.status(500).json({ message: `Reset error: ${err.message}` });
     }
 });
 
