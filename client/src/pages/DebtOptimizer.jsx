@@ -67,20 +67,130 @@ const DebtOptimizer = () => {
     const generatePDF = async () => {
         setIsExporting(true);
         try {
-            const element = contentRef.current;
-            const canvas = await html2canvas(element, {
-                scale: 2,
-                backgroundColor: '#000000',
-                useCORS: true
-            });
-
-            const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const margin = 20;
 
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-            pdf.save('Gullak_Debt_Plan.pdf');
+            // 1. Create a hidden div for the Logo capture
+            const logoDiv = document.createElement('div');
+            logoDiv.style.position = 'absolute';
+            logoDiv.style.top = '-9999px';
+            logoDiv.style.backgroundColor = '#0A0A0A';
+            logoDiv.style.padding = '40px';
+            logoDiv.style.width = '600px';
+            logoDiv.innerHTML = `
+                <div style="font-family: 'Inter', sans-serif; color: #FFD700; background: #0A0A0A; padding: 20px;">
+                    <div style="font-size: 24px; font-weight: bold; margin-bottom: 2px;">मेरा</div>
+                    <div style="font-size: 60px; font-weight: 900; letter-spacing: -3px; line-height: 0.9;">
+                        <span style="color: #FFD700;">GULL</span><span style="color: #FFFFFF;">AK</span><span style="color: #FFD700;">.com</span>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(logoDiv);
+
+            const canvas = await html2canvas(logoDiv, { backgroundColor: '#0A0A0A', scale: 3 });
+            const logoImg = canvas.toDataURL('image/png');
+            document.body.removeChild(logoDiv);
+
+            // Add Header Background
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(0, 0, pageWidth, 50, 'F');
+
+            // Add Logo
+            const imgWidth = 65;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(logoImg, 'PNG', margin, 12, imgWidth, imgHeight);
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(150, 150, 150);
+            pdf.text('PERSONAL DEBT FREEDOM ROADMAP', pageWidth - margin, 18, { align: 'right' });
+            pdf.text(`Generated on: ${new Date().toLocaleDateString()}`, pageWidth - margin, 24, { align: 'right' });
+
+            let y = 65;
+
+            // Summary Grid
+            pdf.setFillColor(245, 245, 245);
+            pdf.roundedRect(margin, y, pageWidth - (margin * 2), 40, 3, 3, 'F');
+
+            pdf.setTextColor(100, 100, 100);
+            pdf.setFontSize(9);
+            pdf.text('TOTAL DEBT', margin + 10, y + 12);
+            pdf.text('INTEREST SAVED', margin + 65, y + 12);
+            pdf.text('TIME SAVED', margin + 120, y + 12);
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`Rs. ${suggestions.stats.totalDebt.toLocaleString()}`, margin + 10, y + 25);
+            pdf.setTextColor(16, 185, 129); // Success Green
+            const interestSaved = baseline.totalInterest - totalInterest;
+            pdf.text(`Rs. ${Math.max(0, Math.round(interestSaved)).toLocaleString()}`, margin + 65, y + 25);
+
+            const monthsSaved = baseline.totalDuration - totalDuration;
+            pdf.setTextColor(59, 130, 246); // Blue
+            pdf.text(`${monthsSaved > 0 ? monthsSaved : 0} Months`, margin + 120, y + 25);
+
+            y += 55;
+
+            // Strategy Header
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(14);
+            pdf.text('REPAYMENT MILESTONES', margin, y);
+            y += 10;
+
+            // Table Header
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(margin, y, pageWidth - (margin * 2), 10, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(9);
+            pdf.text('MONTH', margin + 5, y + 6.5);
+            pdf.text('TARGET LOAN CLOSURE', margin + 40, y + 6.5);
+            pdf.text('YEAR', pageWidth - margin - 5, y + 6.5, { align: 'right' });
+
+            y += 10;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(0, 0, 0);
+
+            if (roadmap.length === 0) {
+                pdf.text('No active loans found. You are debt free!', margin + 5, y + 10);
+            } else {
+                const displayRoadmap = roadmap.slice(0, 20); // Show up to 20 milestones
+                displayRoadmap.forEach((step, i) => {
+                    if (y > 260) {
+                        pdf.addPage();
+                        y = 20;
+                    }
+                    if (i % 2 === 0) {
+                        pdf.setFillColor(252, 252, 252);
+                        pdf.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
+                    }
+                    pdf.text(`Month ${step.month}`, margin + 5, y + 5.5);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.text(step.loanName, margin + 40, y + 5.5);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(`Year ${step.year}`, pageWidth - margin - 5, y + 5.5, { align: 'right' });
+                    y += 8;
+                });
+            }
+
+            // Pro Tip section
+            y += 40;
+            if (y > 250) {
+                pdf.addPage();
+                y = 20;
+            }
+            pdf.setFillColor(255, 249, 230);
+            pdf.roundedRect(margin, y, pageWidth - (margin * 2), 25, 3, 3, 'F');
+            pdf.setTextColor(180, 140, 0);
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AI ADVISOR TIP:', margin + 10, y + 10);
+            pdf.setTextColor(60, 60, 60);
+            pdf.setFont('helvetica', 'normal');
+            pdf.setFontSize(9);
+            pdf.text(`Stick to the ${suggestions.avalanche?.name} extra payment of Rs. ${extraPayment.toLocaleString()} to hit these targets.`, margin + 10, y + 17);
+
+            pdf.save(`Gullak_Debt_Plan_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
         } catch (error) {
             console.error('PDF Export failed:', error);
             alert('Failed to generate PDF. Please try again.');
@@ -101,8 +211,13 @@ const DebtOptimizer = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                     >
-                        <h1 className="text-4xl md:text-5xl font-black mb-4">
-                            Smart <span className="text-gradient">Debt Optimizer</span>
+                        <h1 className="flex flex-col mb-4">
+                            <span className="text-xl md:text-2xl font-bold text-primary -mb-1 ml-1 scale-y-110 origin-bottom">मेरा</span>
+                            <div className="flex items-baseline">
+                                <span className="text-4xl md:text-5xl font-black tracking-tighter text-gradient">GULLAK</span>
+                                <span className="text-2xl md:text-3xl font-black text-white">.com</span>
+                            </div>
+                            <span className="mt-2 text-xl font-bold text-gray-400">Smart Debt Optimizer</span>
                         </h1>
                         <p className="text-gray-400 text-lg max-w-2xl">
                             Stop paying excessive interest. Our "CA-Logic" engine helps you prioritize loans and saves years of repayments.

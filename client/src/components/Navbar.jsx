@@ -57,6 +57,8 @@ const Navbar = () => {
             }
         } catch (err) {
             console.error("Failed to start 2FA setup", err);
+            setShow2FAModal(false);
+            alert("Connection Error: Could not reach the backend server. Please check your VITE_API_URL configuration in Vercel.");
         }
     };
 

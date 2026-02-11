@@ -29,6 +29,11 @@ const ExpenseCalculator = () => {
         return saved ? Number(saved) : 50000;
     });
 
+    const [budgets, setBudgets] = useState(() => {
+        const saved = localStorage.getItem('gullak_budgets');
+        return saved ? JSON.parse(saved) : { Fixed: 25000, Variable: 10000, Luxury: 5000 };
+    });
+
     const [showAI, setShowAI] = useState(false);
     const [isExporting, setIsExporting] = useState(false);
     const contentRef = useRef(null);
@@ -47,6 +52,7 @@ const ExpenseCalculator = () => {
     useEffect(() => {
         localStorage.setItem('gullak_expenses', JSON.stringify(expenses));
         localStorage.setItem('gullak_income', income.toString());
+        localStorage.setItem('gullak_budgets', JSON.stringify(budgets));
 
         // Sync to backend
         const syncToBackend = async () => {
@@ -119,51 +125,47 @@ const ExpenseCalculator = () => {
 
     const aiInsights = useMemo(() => {
         const insights = [];
-        const luxuryExpenses = expenses.filter(e => e.category === 'Luxury' && Number(e.amount) > 0);
-        const variableExpenses = expenses.filter(e => e.category === 'Variable' && Number(e.amount) > 0);
+        const luxuryTotal = expenses.filter(e => e.category === 'Luxury').reduce((a, b) => a + Number(b.amount), 0);
+        const variableTotal = expenses.filter(e => e.category === 'Variable').reduce((a, b) => a + Number(b.amount), 0);
+        const fixedTotal = expenses.filter(e => e.category === 'Fixed').reduce((a, b) => a + Number(b.amount), 0);
 
-        const luxuryTotal = luxuryExpenses.reduce((a, b) => a + Number(b.amount), 0);
-
-        // 1. Target the absolute biggest Luxury item
-        if (luxuryExpenses.length > 0) {
-            const topLuxury = [...luxuryExpenses].sort((a, b) => b.amount - a.amount)[0];
-            if (topLuxury.amount > (income * 0.05)) {
-                insights.push({
-                    type: 'warning',
-                    text: `Your spending on "${topLuxury.name}" (₹${topLuxury.amount.toLocaleString()}) is quite high. Reducing this by 30% could save you ₹${Math.round(topLuxury.amount * 0.3 * 12).toLocaleString()} annually.`
-                });
-            }
+        // 1. Budget Alerts
+        if (luxuryTotal > budgets.Luxury) {
+            insights.push({
+                type: 'warning',
+                text: `You've exceeded your Luxury budget by ₹${(luxuryTotal - budgets.Luxury).toLocaleString()}. Try to cut back on discretionary spending.`
+            });
         }
-
-        // 2. Identify "Money Leaks" in Variable expenses
-        const leakThreshold = income * 0.08;
-        variableExpenses.forEach(exp => {
-            if (exp.amount > leakThreshold) {
-                insights.push({
-                    type: 'info',
-                    text: `"${exp.name}" might be a 'Money Leak'. Can you find cheaper alternatives? A 20% saving (~₹${Math.round(exp.amount * 0.2).toLocaleString()}) is achievable.`
-                });
-            }
-        });
-
-        // 3. General savings target
-        if (savingsRate < 25) {
+        if (variableTotal > budgets.Variable) {
             insights.push({
                 type: 'urgent',
-                text: `Your Savings Rate (${Math.round(savingsRate)}%) is below the ideal 25%. Consider cutting down on non-essential subscriptions or dining out.`
+                text: `Variable expenses are ₹${(variableTotal - budgets.Variable).toLocaleString()} over budget. Review your grocery and fuel habits.`
             });
         }
 
-        // 4. Specific Category Advice
-        if (luxuryTotal > (income * 0.15)) {
+        // 2. Savings Potential
+        if (savingsRate < 20) {
+            insights.push({
+                type: 'urgent',
+                text: `Your savings rate is ${Math.round(savingsRate)}%. In India, aiming for 30% is recommended for financial freedom.`
+            });
+        } else if (savingsRate > 40) {
+            insights.push({
+                type: 'success',
+                text: `Amazing! You are saving ${Math.round(savingsRate)}% of your income. Consider investing this in Equity/Mutual Funds.`
+            });
+        }
+
+        // 3. Specific Advice
+        if (fixedTotal > (income * 0.6)) {
             insights.push({
                 type: 'warning',
-                text: "Luxury expenses are hindering your wealth creation. Try a 'No-Buy' challenge for the next 2 months."
+                text: "Your fixed costs (Rent/EMI) are above 60% of income. This is a high-risk zone. Avoid new loans."
             });
         }
 
         return insights;
-    }, [expenses, income, savingsRate]);
+    }, [expenses, income, savingsRate, budgets]);
 
     const addRow = (category = 'Variable') => {
         const newId = Math.random().toString(36).substr(2, 9);
@@ -220,85 +222,155 @@ const ExpenseCalculator = () => {
         }
     };
 
-    // New Function: Export as PDF
     const exportPDF = async () => {
-        if (!contentRef.current) return;
         setIsExporting(true);
         try {
-            const element = contentRef.current;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const margin = 20;
 
-            // Standardizing canvas capture
-            const canvas = await html2canvas(element, {
-                scale: 1.5, // 1.5 is safer for memory than 2.0
-                backgroundColor: '#0a0a0a',
-                useCORS: true,
-                logging: false,
-                onclone: (clonedDoc) => {
-                    // Hide UI-only elements in the PDF
-                    const buttons = clonedDoc.querySelectorAll('button');
-                    buttons.forEach(btn => btn.style.display = 'none');
-                    const noPrint = clonedDoc.querySelectorAll('#no-print');
-                    noPrint.forEach(el => el.style.display = 'none');
+            // 1. Create a hidden div for the Logo capture (to support Hindi font)
+            const logoDiv = document.createElement('div');
+            logoDiv.style.position = 'absolute';
+            logoDiv.style.top = '-9999px';
+            logoDiv.style.backgroundColor = '#0A0A0A';
+            logoDiv.style.padding = '40px';
+            logoDiv.style.width = '600px';
+            logoDiv.innerHTML = `
+                <div style="font-family: 'Inter', sans-serif; color: #FFD700; background: #0A0A0A; padding: 20px;">
+                    <div style="font-size: 32px; font-weight: bold; margin-bottom: 0px; margin-left: 2px;">मेरा</div>
+                    <div style="font-size: 60px; font-weight: 900; letter-spacing: -3px; line-height: 0.9;">
+                        <span style="color: #FFD700;">GULL</span><span style="color: #FFFFFF;">AK</span><span style="color: #FFD700;">.com</span>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(logoDiv);
 
-                    // FIX: Force standard colors to avoid "oklab" errors in html2canvas (Tailwind 4 issue)
-                    const style = clonedDoc.createElement('style');
-                    style.innerHTML = `
-                        :root {
-                            --color-background: #0A0A0A !important;
-                            --color-surface: #171717 !important;
-                            --color-primary: #FFD700 !important;
-                            --color-secondary: #10B981 !important;
-                        }
-                        /* Fallback for Tailwind 4 gray shades */
-                        .text-gray-200 { color: #e5e7eb !important; }
-                        .text-gray-300 { color: #d1d5db !important; }
-                        .text-gray-400 { color: #9ca3af !important; }
-                        .text-gray-500 { color: #6b7280 !important; }
-                        .text-gray-600 { color: #4b5563 !important; }
-                        
-                        /* Fix gradients which html2canvas sometimes chokes on with background-clip: text */
-                        .text-gradient {
-                            background: none !important;
-                            -webkit-text-fill-color: #FFD700 !important;
-                            color: #FFD700 !important;
-                        }
-                        
-                        /* Remove animations that might mess up capture */
-                        * { 
-                            animation: none !important; 
-                            transition: none !important; 
-                        }
-                    `;
-                    clonedDoc.head.appendChild(style);
+            // Capture the logo with high quality
+            const canvas = await html2canvas(logoDiv, { backgroundColor: '#0A0A0A', scale: 3 });
+            const logoImg = canvas.toDataURL('image/png');
+            document.body.removeChild(logoDiv);
 
-                    // Ensure full visibility
-                    const container = clonedDoc.querySelector('.max-w-7xl');
-                    if (container) container.style.padding = '20px';
+            // Add Header Background
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(0, 0, pageWidth, 50, 'F');
+
+            // Add Logo Image scaled correctly
+            const imgWidth = 65;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(logoImg, 'PNG', margin, 12, imgWidth, imgHeight);
+
+            // Add Subtitle
+            pdf.setFontSize(9);
+            pdf.setTextColor(130, 130, 130);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text('PROFESSIONAL EXPENSE REPORT', margin, 42);
+
+            // Add Date
+            pdf.setFontSize(10);
+            pdf.setTextColor(150, 150, 150);
+            pdf.text(`Statement Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`, pageWidth - margin, 42, { align: 'right' });
+
+            let y = 65;
+
+            // Summary Grid
+            pdf.setFillColor(245, 245, 245);
+            pdf.roundedRect(margin, y, pageWidth - (margin * 2), 35, 3, 3, 'F');
+
+            pdf.setTextColor(100, 100, 100);
+            pdf.setFontSize(9);
+            pdf.text('MONTHLY INCOME', margin + 10, y + 10);
+            pdf.text('TOTAL EXPENSES', margin + 65, y + 10);
+            pdf.text('NET SAVINGS', margin + 120, y + 10);
+
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(`Rs. ${income.toLocaleString()}`, margin + 10, y + 22);
+            pdf.text(`Rs. ${totalExpenses.toLocaleString()}`, margin + 65, y + 22);
+
+            if (savings >= 0) {
+                pdf.setTextColor(16, 185, 129);
+            } else {
+                pdf.setTextColor(239, 68, 68);
+            }
+            pdf.text(`Rs. ${savings.toLocaleString()}`, margin + 120, y + 22);
+
+            y += 50;
+
+            // Data Table
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFontSize(14);
+            pdf.text('EXPENSE BREAKDOWN', margin, y);
+            y += 10;
+
+            // Table Header
+            pdf.setFillColor(10, 10, 10);
+            pdf.rect(margin, y, pageWidth - (margin * 2), 10, 'F');
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(9);
+            pdf.text('DESCRIPTION', margin + 5, y + 6.5);
+            pdf.text('CATEGORY', margin + 80, y + 6.5);
+            pdf.text('AMOUNT (Rs.)', pageWidth - margin - 5, y + 6.5, { align: 'right' });
+
+            y += 10;
+            pdf.setFont('helvetica', 'normal');
+            pdf.setTextColor(0, 0, 0);
+
+            expenses.forEach((exp, i) => {
+                if (y > 270) {
+                    pdf.addPage();
+                    y = 20;
                 }
+
+                if (i % 2 === 0) {
+                    pdf.setFillColor(252, 252, 252);
+                    pdf.rect(margin, y, pageWidth - (margin * 2), 8, 'F');
+                }
+
+                pdf.text(exp.name || 'Unnamed Expense', margin + 5, y + 5.5);
+                pdf.text(exp.category || 'Variable', margin + 80, y + 5.5);
+                pdf.text((exp.amount || 0).toLocaleString(), pageWidth - margin - 5, y + 5.5, { align: 'right' });
+
+                pdf.setDrawColor(240, 240, 240);
+                pdf.line(margin, y + 8, pageWidth - margin, y + 8);
+                y += 8;
             });
 
-            const imgData = canvas.toDataURL('image/png');
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            let heightLeft = pdfHeight;
-            let position = 0;
-            const pageHeight = pdf.internal.pageSize.getHeight();
-
-            // Handle multi-page
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - pdfHeight;
+            // Insights Section (Bottom or New Page)
+            if (y > 230) {
                 pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, pdfHeight);
-                heightLeft -= pageHeight;
+                y = 20;
+            } else {
+                y += 15;
             }
 
-            pdf.save(`Gullak_Report_${new Date().toLocaleDateString().replace(/\//g, '-')}.pdf`);
+            pdf.setFillColor(255, 249, 230); // Soft yellow
+            pdf.roundedRect(margin, y, pageWidth - (margin * 2), 40, 3, 3, 'F');
+
+            pdf.setTextColor(180, 140, 0);
+            pdf.setFontSize(11);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text('AI FINANCIAL ADVISOR INSIGHTS', margin + 10, y + 10);
+
+            pdf.setTextColor(60, 60, 60);
+            pdf.setFontSize(9);
+            pdf.setFont('helvetica', 'normal');
+
+            const selectedInsights = aiInsights.slice(0, 2);
+            let insightY = y + 18;
+            selectedInsights.forEach(insight => {
+                const lines = pdf.splitTextToSize(`> ${insight.text}`, pageWidth - (margin * 2) - 20);
+                pdf.text(lines, margin + 10, insightY);
+                insightY += (lines.length * 5);
+            });
+
+            // Bottom Footer
+            pdf.setTextColor(150, 150, 150);
+            pdf.setFontSize(8);
+            pdf.text('This is an auto-generated report by Gullak Smart CA-Inspired Personal Finance Assistant.', pageWidth / 2, 285, { align: 'center' });
+
+            pdf.save(`Gullak_Expense_Report_${new Date().getMonth() + 1}_${new Date().getFullYear()}.pdf`);
         } catch (error) {
             console.error('PDF Generation Crash:', error);
             alert('PDF Export Error: ' + (error.message || 'Check console for details'));
@@ -318,12 +390,12 @@ const ExpenseCalculator = () => {
                         initial={{ opacity: 0, x: -20 }}
                         animate={{ opacity: 1, x: 0 }}
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold mb-4 tracking-widest uppercase">
-                            <Calculator size={14} />
-                            <span>Financial Planning</span>
-                        </div>
-                        <h1 className="text-4xl md:text-5xl font-black tracking-tight mb-2">
-                            Monthly <span className="text-gradient">Expense Planner</span>
+                        <h1 className="flex flex-col mb-2">
+                            <span className="text-xl md:text-2xl font-bold text-primary -mb-1 ml-1 scale-y-110 origin-bottom">मेरा</span>
+                            <div className="flex items-baseline">
+                                <span className="text-4xl md:text-5xl font-black tracking-tighter text-gradient">GULLAK</span>
+                                <span className="text-2xl md:text-3xl font-black text-white">.com</span>
+                            </div>
                         </h1>
                         <p className="text-gray-400 text-lg max-w-xl">
                             A precision spreadsheet tool for the modern Indian household.
@@ -658,46 +730,67 @@ const ExpenseCalculator = () => {
                             </p>
                         </div>
 
-                        {/* Quick Metrics */}
+                        {/* Budget Tracker Metrics */}
                         <div className="grid grid-cols-1 gap-4">
-                            <div className="glass p-6 rounded-3xl border-white/5 hover:bg-white/[0.03] transition-colors">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="p-2 rounded-xl bg-blue-500/10 text-blue-400">
-                                        <Target size={20} />
-                                    </div>
-                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Emergency Fund Target</span>
-                                </div>
-                                <h4 className="text-2xl font-black">₹{(totalExpenses * 6).toLocaleString()}</h4>
-                                <p className="text-[10px] text-gray-500 mt-1">6 months of runway</p>
-                            </div>
+                            {['Fixed', 'Variable', 'Luxury'].map((cat) => {
+                                const spent = expenses.filter(e => e.category === cat).reduce((a, b) => a + (Number(b.amount) || 0), 0);
+                                const limit = budgets[cat];
+                                const percent = limit > 0 ? (spent / limit) * 100 : 0;
+                                const isOver = spent > limit;
 
-                            <div className="glass p-6 rounded-3xl border-white/5 hover:bg-white/[0.03] transition-colors">
-                                <div className="flex items-center gap-4 mb-3">
-                                    <div className="p-2 rounded-xl bg-orange-500/10 text-orange-400">
-                                        <TrendingDown size={20} />
+                                return (
+                                    <div key={cat} className="glass p-6 rounded-3xl border-white/5 hover:bg-white/[0.03] transition-colors">
+                                        <div className="flex justify-between items-center mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`p-2 rounded-xl ${cat === 'Fixed' ? 'bg-primary/10 text-primary' :
+                                                    cat === 'Variable' ? 'bg-orange-500/10 text-orange-400' : 'bg-red-500/10 text-red-400'}`}>
+                                                    {cat === 'Fixed' ? <Target size={18} /> :
+                                                        cat === 'Variable' ? <TrendingDown size={18} /> : <AlertCircle size={18} />}
+                                                </div>
+                                                <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">{cat} Budget</span>
+                                            </div>
+                                            <div className="text-right">
+                                                <span className={`text-xs font-black ${isOver ? 'text-red-500' : 'text-white'}`}>
+                                                    ₹{spent.toLocaleString()} / ₹{limit.toLocaleString()}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden mb-2">
+                                            <motion.div
+                                                className={`h-full rounded-full ${isOver ? 'bg-red-500' :
+                                                    cat === 'Fixed' ? 'bg-primary' :
+                                                        cat === 'Variable' ? 'bg-orange-500' : 'bg-red-400'}`}
+                                                initial={{ width: 0 }}
+                                                animate={{ width: `${Math.min(percent, 100)}%` }}
+                                            />
+                                        </div>
+                                        <div className="flex justify-between text-[9px] font-black uppercase tracking-tighter text-gray-600">
+                                            <span>{Math.round(percent)}% USED</span>
+                                            <span>₹{(limit - spent).toLocaleString()} LEFT</span>
+                                        </div>
                                     </div>
-                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Fixed Cost Ratio</span>
-                                </div>
-                                <div className="space-y-3">
-                                    <div className="flex justify-between items-end">
-                                        <h4 className={`text-3xl font-black ${(expenses.filter(e => e.category === 'Fixed').reduce((a, b) => a + (Number(b.amount) || 0), 0) / totalExpenses) * 100 > 50
-                                            ? 'text-red-500' : 'text-white'
-                                            }`}>
-                                            {Math.round((expenses.filter(e => e.category === 'Fixed').reduce((a, b) => a + (Number(b.amount) || 0), 0) / totalExpenses) * 100 || 0)}%
-                                        </h4>
-                                        <span className="text-[10px] font-bold text-gray-400">TARGET: &lt;50%</span>
-                                    </div>
-                                    <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                        <motion.div
-                                            className={`h-full rounded-full ${(expenses.filter(e => e.category === 'Fixed').reduce((a, b) => a + (Number(b.amount) || 0), 0) / totalExpenses) * 100 > 50
-                                                ? 'bg-red-500' : 'bg-orange-500'
-                                                }`}
-                                            initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min((expenses.filter(e => e.category === 'Fixed').reduce((a, b) => a + (Number(b.amount) || 0), 0) / totalExpenses) * 100 || 0, 100)}%` }}
+                                );
+                            })}
+                        </div>
+
+                        {/* Budget Adjustment Card */}
+                        <div className="glass p-8 rounded-[2.5rem] border-primary/20 bg-primary/5">
+                            <h3 className="text-primary text-[10px] font-black uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                <Sparkles size={14} /> Adjust Budget Limits
+                            </h3>
+                            <div className="space-y-4">
+                                {['Fixed', 'Variable', 'Luxury'].map(cat => (
+                                    <div key={cat}>
+                                        <label className="text-[10px] font-bold text-gray-500 uppercase mb-2 block">{cat} Target</label>
+                                        <input
+                                            type="number"
+                                            value={budgets[cat]}
+                                            onChange={(e) => setBudgets({ ...budgets, [cat]: Number(e.target.value) })}
+                                            className="w-full bg-background/50 border border-white/10 rounded-xl px-4 py-2 text-sm font-bold focus:border-primary outline-none transition-all"
                                         />
                                     </div>
-                                    <p className="text-[10px] text-gray-500">Recommended is under 50% for financial agility.</p>
-                                </div>
+                                ))}
                             </div>
                         </div>
 
