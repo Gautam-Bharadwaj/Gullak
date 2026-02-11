@@ -83,7 +83,12 @@ const Auth = () => {
                 completeLogin(data.user);
             }
         } catch (err) {
-            setError(err.message);
+            const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
+            if (err.message === 'Failed to fetch') {
+                setError(`Connection Error: Trying to reach ${baseUrl}. Please check VITE_API_URL in Vercel settings.`);
+            } else {
+                setError(err.message);
+            }
         } finally {
             setIsLoading(false);
         }
