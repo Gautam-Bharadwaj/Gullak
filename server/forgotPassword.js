@@ -91,10 +91,9 @@ router.post('/forgot-password', async (req, res) => {
             writeData(db);
         }
 
-        // Send Email
-        const transporter = getTransporter();
+        // Prepare mail options (used by both Resend and Nodemailer)
         const mailOptions = {
-            from: `"Gullak Support" <${process.env.EMAIL_USER}>`,
+            from: `"Gullak Support" <${process.env.EMAIL_USER}>`, // Nodemailer uses this directly
             to: email,
             subject: '🔐 Your Gullak Password Reset OTP',
             html: `
@@ -116,14 +115,37 @@ router.post('/forgot-password', async (req, res) => {
             `
         };
 
-        await transporter.sendMail(mailOptions);
+        // Send Email Logic
+        if (process.env.RESEND_API_KEY) {
+            const { Resend } = require('resend');
+            const resend = new Resend(process.env.RESEND_API_KEY);
+
+            // Note: On free Resend, you can only send to the email you signed up with
+            // unless you verify a domain. verify domain at https://resend.com/domains
+            await resend.emails.send({
+                from: 'Gullak Support <onboarding@resend.dev>', // Default free sender
+                to: email,
+                subject: '🔐 Your Gullak Password Reset OTP',
+                html: mailOptions.html
+            });
+            console.log("Email sent successfully via Resend API");
+        } else {
+            // Fallback to Nodemailer (SMTP)
+            if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+                throw new Error("SMTP Credentials (EMAIL_USER/PASS) missing in Server Environment.");
+            }
+            const transporter = getTransporter();
+            await transporter.sendMail(mailOptions);
+            console.log("Email sent successfully via Nodemailer");
+        }
+
         res.json({ message: 'Success! OTP sent to your email.' });
 
     } catch (err) {
         console.error("Forgot Password Fatal Error:", err);
         res.status(500).json({
             message: `Server Error: ${err.message}`,
-            details: "Ensure EMAIL_USER and EMAIL_PASS (App Password) are correctly set."
+            details: "If on Render, please use RESEND_API_KEY as SMTP is blocked."
         });
     }
 });
