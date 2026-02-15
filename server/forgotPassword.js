@@ -12,11 +12,11 @@ const DB_FILE = path.join(__dirname, 'db.json');
 const getTransporter = () => {
     return nodemailer.createTransport({
         host: 'smtp-relay.brevo.com',
-        port: 587,
-        secure: false, // true for 465, false for other ports
+        port: 2525, // Port 2525 is often better on Render
+        secure: false,
         auth: {
-            user: process.env.EMAIL_USER, // Your Brevo Login Email
-            pass: process.env.EMAIL_PASS  // Your Brevo SMTP Key
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         }
     });
 };
@@ -38,7 +38,7 @@ const writeData = (data) => {
 
 // 1. Forgot Password - Send OTP
 router.post('/forgot-password', async (req, res) => {
-    console.log("[FORGOT_PASSWORD] Request received for:", req.body.email);
+    console.log("[FORGOT_PASSWORD] Starting process for:", req.body.email);
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -56,26 +56,8 @@ router.post('/forgot-password', async (req, res) => {
         }
 
         if (!user) {
-            return res.status(404).json({ message: 'No account found with this email. Please check your spelling or register first.' });
-        }
-
-        // Check for missing SMTP credentials
-        const emailUser = process.env.EMAIL_USER;
-        const emailPass = process.env.EMAIL_PASS;
-
-        if (!emailUser || !emailPass || emailUser === 'your-email@gmail.com') {
-            const errorMsg = "SMTP Credentials (EMAIL_USER/PASS) are not configured. Please set them in your .env file.";
-            console.error(`[FORGOT_PASSWORD] ${errorMsg}`);
-            console.log(`[DEBUG] EMAIL_USER is: ${emailUser || 'EMPTY/MISSING'}`);
-
-            if (process.env.NODE_ENV === 'development') {
-                console.log(`[DEV ONLY] OTP for ${email}: ${otp}`);
-                return res.status(200).json({
-                    message: 'Development Mode: OTP logged to server console.',
-                    devOtp: otp
-                });
-            }
-            throw new Error(errorMsg);
+            console.log("[FORGOT_PASSWORD] User not found:", email);
+            return res.status(404).json({ message: 'No account found with this email. Please register first.' });
         }
 
         // Store OTP
@@ -91,62 +73,28 @@ router.post('/forgot-password', async (req, res) => {
             writeData(db);
         }
 
-        // Prepare mail options (used by both Resend and Nodemailer)
+        // Send Email via Brevo
+        const transporter = getTransporter();
         const mailOptions = {
-            from: `"Gullak Support" <${process.env.EMAIL_USER}>`, // Nodemailer uses this directly
+            from: `"Gullak Support" <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: '🔐 Your Gullak Password Reset OTP',
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 500px; margin: auto;">
-                    <div style="text-align: center; margin-bottom: 20px;">
-                        <h2 style="color: #FFD700; margin: 0;">Gullak</h2>
-                        <p style="color: #888; margin: 5px 0;">Simple. Smart. Savings.</p>
-                    </div>
-                    <div style="background: #fafafa; padding: 20px; border-radius: 10px; text-align: center;">
-                        <p style="margin-top: 0;">You requested to reset your password. Use the code below:</p>
-                        <div style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #FFD700; margin: 20px 0; font-family: monospace;">
-                            ${otp}
-                        </div>
-                        <p style="font-size: 13px; color: #666;">This code is valid for 10 minutes only.</p>
-                    </div>
-                    <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-                    <p style="font-size: 11px; color: #aaa; text-align: center;">If you didn't request this, please ignore this email.</p>
-                </div>
-            `
+            subject: '🔐 Password Reset OTP',
+            html: `<h3>Your OTP is: ${otp}</h3><p>Valid for 10 minutes.</p>`
         };
 
-        // Send Email Logic
-        if (process.env.RESEND_API_KEY) {
-            const { Resend } = require('resend');
-            const resend = new Resend(process.env.RESEND_API_KEY);
-
-            // Note: On free Resend, you can only send to the email you signed up with
-            // unless you verify a domain. verify domain at https://resend.com/domains
-            await resend.emails.send({
-                from: 'Gullak Support <onboarding@resend.dev>', // Default free sender
-                to: email,
-                subject: '🔐 Your Gullak Password Reset OTP',
-                html: mailOptions.html
-            });
-            console.log("Email sent successfully via Resend API");
-        } else {
-            // Fallback to Nodemailer (SMTP)
-            if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-                throw new Error("SMTP Credentials (EMAIL_USER/PASS) missing in Server Environment.");
-            }
-            const transporter = getTransporter();
-            await transporter.sendMail(mailOptions);
-            console.log("Email sent successfully via Nodemailer");
+        if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+            throw new Error("Missing EMAIL_USER or EMAIL_PASS in Render settings.");
         }
 
-        res.json({ message: 'Success! OTP sent to your email.' });
+        console.log("[FORGOT_PASSWORD] Attempting to send email via Brevo port 2525...");
+        await transporter.sendMail(mailOptions);
+        console.log("[FORGOT_PASSWORD] Email sent successfully!");
+
+        res.json({ message: 'Success! OTP sent.' });
 
     } catch (err) {
-        console.error("Forgot Password Fatal Error:", err);
-        res.status(500).json({
-            message: `Server Error: ${err.message}`,
-            details: "If on Render, please use RESEND_API_KEY as SMTP is blocked."
-        });
+        console.error("Forgot Password Error:", err);
+        res.status(500).json({ message: `Mail Error: ${err.message}` });
     }
 });
 
@@ -155,12 +103,11 @@ router.post('/verify-otp', async (req, res) => {
     const { email, otp, newPassword } = req.body;
     try {
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-
         if (process.env.MONGODB_URI) {
             const User = mongoose.model('User');
             const user = await User.findOne({ email });
             if (!user || user.resetOtp !== otp || Date.now() > user.resetOtpExpires) {
-                return res.status(400).json({ message: 'Invalid or expired OTP. Please request a new one.' });
+                return res.status(400).json({ message: 'Invalid or expired OTP.' });
             }
             user.password = hashedPassword;
             user.resetOtp = null;
@@ -170,14 +117,14 @@ router.post('/verify-otp', async (req, res) => {
             const db = readData();
             const user = db.users.find(u => u.email === email);
             if (!user || user.resetOtp !== otp || Date.now() > user.resetOtpExpires) {
-                return res.status(400).json({ message: 'Invalid or expired OTP. Please request a new one.' });
+                return res.status(400).json({ message: 'Invalid or expired OTP.' });
             }
             user.password = hashedPassword;
             delete user.resetOtp;
             delete user.resetOtpExpires;
             writeData(db);
         }
-        res.json({ message: 'Victory! Password updated. Redirecting to login...' });
+        res.json({ message: 'Password updated successfully!' });
     } catch (err) {
         res.status(500).json({ message: `Reset failed: ${err.message}` });
     }
