@@ -1,0 +1,25 @@
+# PROPRIETARY LICENSE - ALL RIGHTS RESERVED
+
+Copyright (c) 2026 Gautam Jha & Mohit Kourav (Gautam-Bharadwaj & MOHITKOURAV01)
+Project: Gullak Digital Gold Platform
+
+---------------------------------------------------------------------------
+
+English:
+No part of this software, including the source code, design, logic, and 
+branding, may be used, reproduced, distributed, or modified in any form 
+without the prior written permission of the copyright holder. 
+
+By viewing this repository, you agree to respect the intellectual property 
+of the author. Unauthorised use of this code for commercial or personal 
+gain is strictly prohibited.
+
+HindiEnglish (Summary):
+Is software ka koi bhi hissa, code, ya design bina author ki likhit 
+permission ke istemal, copy ya distribute nahi kiya ja sakta. Yeh ek 
+proprietary project hai.
+
+---------------------------------------------------------------------------
+
+For permission requests or licensing inquiries, please contact:
+[kr.gautamjha03@gmail.com]
