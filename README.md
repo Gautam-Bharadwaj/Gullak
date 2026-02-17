@@ -1,6 +1,6 @@
-# Gullak - Intelligent Personal Finance Management
+# Gullak - Intelligent Personal Finance Management  ![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)
 
-Gullak is a professional financial assistant designed to bridge the gap between simple expense tracking and strategic financial planning. The platform provides a comprehensive ecosystem to manage income, optimize debt, and build long-term wealth through data-driven insights.
+Gullak is a professional financial assistant designed to bridge the gap between simple expense tracking and strategic financial planning. The platform provides a comprehensive ecosystem to manage income, optimise debt, and build long-term wealth through data-driven insights.
 
 ---
 
@@ -25,28 +25,28 @@ Users input financial data—including expenses, income sources, and loan detail
 ### 2. Intelligent Persistence
 The server employs a flexible storage strategy:
 - **Production Mode**: Connects to a MongoDB database for high-scale data management.
-- **Local/Development Mode**: Utilizes a persistent JSON-based file system (db.json) to ensure zero-configuration setup for new developers while maintaining data across sessions.
+- **Local/Development Mode**: Utilises a persistent JSON-based file system (db.json) to ensure zero-configuration setup for new developers while maintaining data across sessions.
 
 ### 3. Expert Analysis Engine
 When a user requests financial insights:
 - The server aggregates historical spending patterns and debt structures.
 - It interfaces with the Gemini AI API to generate "Expert Advice," providing contextual recommendations on money leaks and saving opportunities.
-- The Debt Optimizer module executes mathematical algorithms to calculate amortization schedules and simulate prepayment impacts.
+- The Debt Optimiser module executes mathematical algorithms to calculate amortisation schedules and simulate prepayment impacts.
 
 ### 4. Security Layer
 Account security is managed through a multi-tier authentication system:
 - Standard credential-based login.
-- Two-Factor Authentication (2FA) utilizing TOTP (Time-based One-Time Passwords) via apps like Google Authenticator.
+- Two-Factor Authentication (2FA) utilising TOTP (Time-based One-Time Passwords) via apps like Google Authenticator.
 - Fallback Email OTP (One-Time Password) systems for recovery and verification.
 
 ---
 
 ## Core Features
 
-### Advanced Debt Optimizer
+### Advanced Debt Optimiser
 - Amortization Visualization: Detailed breakdown of principal vs. interest payments.
 - Prepayment Simulator: Real-time calculation of interest and time savings from extra payments.
-- Repayment Roadmap: Algorithmic prioritization of loans using Avalanche or Snowball methods.
+- Repayment Roadmap: Algorithmic prioritisation of loans using Avalanche or Snowball methods.
 
 ### Intelligent Expense Tracking
 - Modern Dashboard: Real-time visibility into cash flow and spending categories.
@@ -119,13 +119,22 @@ npx expo start
 
 The platform is designed for automated deployment:
 - **Backend**: Pre-configured for Render via `render.yaml`.
-- **Frontend**: Optimized for Vercel via `vercel.json`.
+- **Frontend**: Optimised for Vercel via `vercel.json`.
 
 ---
 
-## Contribution Guidelines
+## ⚖️ License
 
-1. Fork the repository.
-2. Create a feature branch (git checkout -b feature/name).
-3. Commit changes with professional descriptions.
-4. Push to the branch and open a Pull Request.
+Copyright (c) 2026 **Gautam Jha  & Mohit Kourav **. All Rights Reserved.
+
+Yeh project proprietary hai. Iska source code, design, aur logic bina author ki explicit permission ke:
+* Copy nahi kiya ja sakta.
+* Modify ya distribute nahi kiya ja sakta.
+* Kisi bhi commercial project mein use nahi kiya ja sakta.
+
+Aap is code ko sirf educational purposes ke liye dekh (view) sakte hain. Agar aap ise kisi aur tarah se use karna chahte hain, toh kripya permission ke liye contact karein.
+
+---
+📧 **Contact:** [kr.gautamjha03@gmail.com] / 
+{https://www.linkedin.com/in/kumar-gautam-2bb399263/}
+{https://www.linkedin.com/in/mohit-kourav-a03215338/}
