@@ -8,6 +8,7 @@ import DebtOptimizer from './pages/DebtOptimizer';
 import Insights from './pages/Insights';
 import Auth from './pages/Auth';
 import Cards from './pages/Cards';
+import Dreams from './pages/Dreams';
 import ForgotPassword from './components/ForgotPassword';
 import VerifyOtp from './components/VerifyOtp';
 
@@ -28,6 +29,7 @@ function App() {
             <Route path="/emi-optimization" element={<EmiOptimizationPage />} />
             <Route path="/insights" element={<Insights />} />
             <Route path="/cards" element={<Cards />} />
+            <Route path="/dreams" element={<Dreams />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/verify-otp" element={<VerifyOtp />} />

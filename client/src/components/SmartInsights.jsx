@@ -1,36 +1,43 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Brain, TrendingUp, Shield, Target, ArrowRight, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const SmartInsights = () => {
+    const navigate = useNavigate();
+
     const insights = [
         {
             title: "Spending Patterns",
             description: "Automatically identify where your money leaks. AI Advisor flags subscriptions you forgot about.",
             icon: <Brain className="text-primary" />,
             color: "peer-hover:text-primary",
-            bg: "bg-primary/5"
+            bg: "bg-primary/5",
+            path: "/calculate-expenses"
         },
         {
             title: "Future Net Worth",
             description: "Visualize your wealth trajectory based on current savings and EMI prepayments.",
             icon: <TrendingUp className="text-secondary" />,
             color: "text-secondary",
-            bg: "bg-secondary/5"
+            bg: "bg-secondary/5",
+            path: "/insights"
         },
         {
             title: "Risk Assessment",
             description: "Get alerts if your debt-to-income ratio exceeds safe Indian household limits.",
             icon: <Shield className="text-red-400" />,
             color: "text-red-400",
-            bg: "bg-red-400/5"
+            bg: "bg-red-400/5",
+            path: "/debt-optimizer"
         },
         {
             title: "Goal Precision",
             description: "Reverse engineer your monthly savings needed for your next house or car downpayment.",
             icon: <Target className="text-blue-400" />,
             color: "text-blue-400",
-            bg: "bg-blue-400/5"
+            bg: "bg-blue-400/5",
+            path: "/emi-optimization"
         }
     ];
 
@@ -76,7 +83,10 @@ const SmartInsights = () => {
                             <p className="text-gray-400 text-sm leading-relaxed mb-8 flex-1">
                                 {item.description}
                             </p>
-                            <button className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-primary transition-colors">
+                            <button
+                                onClick={() => navigate(item.path)}
+                                className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-white/40 group-hover:text-primary transition-colors"
+                            >
                                 Explore Tool <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                             </button>
                         </div>
@@ -127,3 +137,4 @@ const SmartInsights = () => {
 };
 
 export default SmartInsights;
+
