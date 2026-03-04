@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Clock, ArrowRight, Zap, TrendingUp, TrendingDown, Calculator, Wallet } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // API Configuration
@@ -14,11 +14,13 @@ const GlobalSearch = () => {
     const [isLoading, setIsLoading] = useState(false);
     const inputRef = useRef(null);
     const navigate = useNavigate();
+    const location = useLocation();
+    const isDreamsPage = location.pathname === '/dreams';
 
     // Icon helper to render the correct component from a string
     const getIcon = (iconName) => {
         switch (iconName) {
-            case 'calculator': return <Calculator size={18} className="text-primary" />;
+            case 'calculator': return <Calculator size={18} className={isDreamsPage ? "text-cyan-400" : "text-primary"} />;
             case 'trending-down': return <TrendingDown size={18} className="text-secondary" />;
             case 'trending-up': return <TrendingUp size={18} className="text-green-400" />;
             case 'zap': return <Zap size={18} className="text-orange-400" />;
@@ -128,10 +130,10 @@ const GlobalSearch = () => {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 hover:border-primary/30 hover:bg-white/10 transition-all group lg:min-w-[140px]"
+                className={`flex items-center gap-3 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 ${isDreamsPage ? 'hover:border-orange-500/30' : 'hover:border-primary/30'} hover:bg-white/10 transition-all group lg:min-w-[140px]`}
                 title="Search Gullak (⌘K)"
             >
-                <Search size={16} className="text-gray-400 group-hover:text-primary transition-colors" />
+                <Search size={16} className={`text-gray-400 ${isDreamsPage ? 'group-hover:text-white' : 'group-hover:text-primary'} transition-colors`} />
                 <span className="hidden lg:inline text-xs font-bold text-gray-500 group-hover:text-gray-300">Search</span>
                 <kbd className="hidden lg:inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/10 border border-white/10 text-[10px] text-gray-400 font-mono font-bold leading-none">
                     <span>⌘</span>
@@ -233,7 +235,7 @@ const GlobalSearch = () => {
                                         {isLoading ? (
                                             <div className="py-12 text-center">
                                                 <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-                                                <p className="text-gray-500 text-sm font-bold tracking-tight">Accessing GULLAK Knowledge Base...</p>
+                                                <p className="text-gray-500 text-sm font-bold tracking-tight">Accessing <span className={isDreamsPage ? 'text-orange-500' : 'text-primary'}>GUL</span>LAK Knowledge Base...</p>
                                             </div>
                                         ) : results.length > 0 ? (
                                             results.map(item => (
@@ -243,15 +245,15 @@ const GlobalSearch = () => {
                                                     className="w-full text-left p-4 rounded-2xl hover:bg-white/5 flex items-center justify-between group transition-all"
                                                 >
                                                     <div className="flex items-center gap-4">
-                                                        <div className="p-2.5 rounded-xl bg-white/5 text-gray-400 group-hover:bg-primary/10 transition-colors">
+                                                        <div className={`p-2.5 rounded-xl bg-white/5 text-gray-400 ${isDreamsPage ? 'group-hover:bg-white/10 group-hover:text-white' : 'group-hover:bg-primary/10 group-hover:text-primary'} transition-colors`}>
                                                             {getIcon(item.icon)}
                                                         </div>
                                                         <div>
-                                                            <div className="font-bold text-white group-hover:text-primary transition-colors">{item.title}</div>
+                                                            <div className={`font-bold text-white ${isDreamsPage ? 'group-hover:text-orange-400' : 'group-hover:text-primary'} transition-colors`}>{item.title}</div>
                                                             <div className="text-xs text-gray-500">{item.description}</div>
                                                         </div>
                                                     </div>
-                                                    <ArrowRight size={16} className="text-gray-700 group-hover:text-primary transform lg:group-hover:translate-x-1 transition-all" />
+                                                    <ArrowRight size={16} className={`text-gray-700 ${isDreamsPage ? 'group-hover:text-white' : 'group-hover:text-primary'} transform lg:group-hover:translate-x-1 transition-all`} />
                                                 </button>
                                             ))
                                         ) : (
