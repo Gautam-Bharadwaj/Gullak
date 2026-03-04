@@ -1,38 +1,31 @@
 // ... (Previous imports and components)
-// (Focusing onAdding the Stats Grid inside Dreams component)
 
 const Dreams = () => {
-    // ... (States and Hooks)
-    const [totalNeeded] = useState(10200000);
-    const [totalSaved] = useState(4050000);
-    const overallProgress = 40;
+    // ... (States and Logic)
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [selectedDreamForStrategy, setSelectedDreamForStrategy] = useState(null);
 
     return (
         <div className="cursor-none">
-            {/* ... (Previous content) */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-                {/* ... (Header Content) */}
+            {/* ... (Previous Sections) */}
 
-                <div className="grid md:grid-cols-3 gap-10 mb-32">
-                    {[
-                        { label: "Materialization Value", val: (totalNeeded / 100000).toFixed(2), unit: "L", color: "from-purple-600/30 border-purple-500/30" },
-                        { label: "Current Density", val: (totalSaved / 100000).toFixed(2), unit: "L", color: "from-cyan-600/20 border-cyan-500/20" },
-                        { label: "Sync Status", val: overallProgress, unit: "%", color: "from-indigo-600/30 border-indigo-500/30" }
-                    ].map((stat, i) => (
+            {/* Modals */}
+            <AnimatePresence>
+                {showAddModal && (
+                    <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/95 backdrop-blur-2xl">
                         <motion.div
-                            key={i} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 + i * 0.1 }}
-                            whileHover={{ y: -10, scale: 1.02 }}
-                            className={`glass p-12 rounded-[4rem] border ${stat.color} bg-gradient-to-br to-transparent backdrop-blur-[80px] border-t-white/30 relative overflow-hidden group`}
+                            initial={{ opacity: 0, scale: 0.9, y: 50 }} animate={{ opacity: 1, scale: 1, y: 0 }}
+                            className="bg-[#0a0a0a] border border-white/10 rounded-[4rem] p-12 max-w-lg w-full shadow-2xl"
                         >
-                            <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-[60px] group-hover:bg-white/10 transition-all" />
-                            <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] block mb-6">{stat.label}</span>
-                            <div className="text-6xl font-black flex items-baseline gap-3 text-white tracking-tighter">
-                                {stat.val} <span className="text-2xl text-slate-500 font-bold">{stat.unit}</span>
+                            <h3 className="text-4xl font-black text-white mb-10">New <span className="text-purple-400">Dream.</span></h3>
+                            <div className="space-y-8">
+                                <input type="text" placeholder="Goal Identity" className="w-full bg-white/5 border border-white/10 rounded-3xl px-8 py-5 text-white font-bold" />
+                                <button className="w-full py-6 bg-white text-black font-black rounded-3xl hover:bg-purple-500 hover:text-white transition-all">MANIFEST REALITY 🚀</button>
                             </div>
                         </motion.div>
-                    ))}
-                </div>
-            </div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
