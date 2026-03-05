@@ -17,7 +17,7 @@ Gullak is built as a complete financial toolkit with a decoupled architecture, e
 
 ## How it Works
 
-The platform operates through a seamless flow of data between the user interface and the analytical backend:
+The platform operates through a seamless flow of data between the user interface and the analytical backend:-
 
 ### 1. Data Collection and Processing
 Users input financial data—including expenses, income sources, and loan details—through the React-based frontend. This data is validated in real-time and transmitted via secure REST APIs to the central server.
