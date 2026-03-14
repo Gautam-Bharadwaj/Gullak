@@ -96,22 +96,7 @@ const Hero = () => {
                                 </div>
                             </div>
 
-                            {/* Floaties */}
-                            <motion.div
-                                animate={{ y: [0, -15, 0] }}
-                                transition={{ duration: 4, repeat: Infinity }}
-                                className="absolute -top-6 -right-6 glass p-4 rounded-2xl border-primary/30"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center text-primary">
-                                        <IndianRupee size={16} />
-                                    </div>
-                                    <div>
-                                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">Health Score</p>
-                                        <p className="font-bold">84/100</p>
-                                    </div>
-                                </div>
-                            </motion.div>
+
                         </div>
                     </motion.div>
                 </div>
