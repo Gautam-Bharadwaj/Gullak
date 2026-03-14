@@ -118,7 +118,34 @@ const Navbar = () => {
                         <div className="hidden md:flex items-center gap-8">
                             <div className="flex items-center gap-8 mr-4 border-r border-white/10 pr-8">
                                 {navItems.map((item) => (
-                                    item.path.startsWith('/#') ? (
+                                    item.dropdown ? (
+                                        <div key={item.name} className="relative group py-2">
+                                            <span className={`text-sm font-medium cursor-pointer transition-colors duration-200 ${isDreamsPage ? 'text-gray-400 hover:text-white' : 'text-gray-300 hover:text-primary'} flex items-center gap-1`}>
+                                                {item.name} <ChevronRight size={14} className="group-hover:rotate-90 transition-transform" />
+                                            </span>
+                                            <div className="absolute top-full left-0 mt-0 w-56 rounded-xl bg-[#0a0a0a] border border-white/10 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 translate-y-2 group-hover:translate-y-0 z-50">
+                                                {item.dropdown.map(subItem => (
+                                                    subItem.path.startsWith('/#') ? (
+                                                        <a
+                                                            key={subItem.name}
+                                                            href={subItem.path}
+                                                            className={`block px-5 py-2.5 text-sm transition-colors duration-200 ${isDreamsPage ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-300 hover:text-primary hover:bg-white/5'}`}
+                                                        >
+                                                            {subItem.name}
+                                                        </a>
+                                                    ) : (
+                                                        <Link
+                                                            key={subItem.name}
+                                                            to={subItem.path}
+                                                            className={`block px-5 py-2.5 text-sm transition-colors duration-200 ${location.pathname === subItem.path ? (isDreamsPage ? 'text-orange-500 bg-white/5' : 'text-primary bg-white/5') : (isDreamsPage ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-300 hover:text-primary hover:bg-white/5')}`}
+                                                        >
+                                                            {subItem.name}
+                                                        </Link>
+                                                    )
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : item.path.startsWith('/#') ? (
                                         <a
                                             key={item.name}
                                             href={item.path}
