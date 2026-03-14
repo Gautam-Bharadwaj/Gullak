@@ -435,7 +435,7 @@ const DreamCard = ({ dream, index, totalSaved, totalNeeded, calculateProgress, c
             }}
             whileHover={{ y: -15, scale: 1.02 }}
             transition={{ delay: index * 0.05, type: "spring", stiffness: 300, damping: 20 }}
-            className="relative group h-full cursor-none"
+            className="relative group h-full"
         >
             <div className="absolute inset-0 bg-gradient-to-b from-purple-500/20 to-transparent blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
 
@@ -641,9 +641,8 @@ const Dreams = () => {
 
     return (
         <div
-            className="cursor-none"
+            className=""
         >
-            <MagneticCursor mouseX={mouseX} mouseY={mouseY} />
 
             <AnimatePresence>
                 {isEntering && <DreamPortal onComplete={() => setIsEntering(false)} />}
@@ -709,129 +708,21 @@ const Dreams = () => {
 
                     {/* Celestial Header */}
                     <div className="flex flex-col items-center text-center mb-36 relative mt-12">
-                        {/* Magnet Floating Icon */}
-                        <motion.div
-                            style={{
-                                x: useTransform(mouseXSpring, (x) => (x - window.innerWidth / 2) * 0.05),
-                                y: useTransform(mouseYSpring, (y) => (y - window.innerHeight / 2) * 0.05),
-                            }}
-                            initial={{ scale: 0, rotate: -45 }}
-                            animate={{ scale: 1, rotate: 0 }}
-                            transition={{ type: "spring", damping: 12, delay: 0.2 }}
-                            className="w-32 h-32 bg-gradient-to-br from-purple-500/20 to-cyan-500/20 rounded-[3rem] flex items-center justify-center text-white mb-12 backdrop-blur-3xl border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.4)] relative group overflow-hidden"
-                        >
-                            <Sparkles size={48} strokeWidth={1} className="animate-pulse relative z-10" />
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                        </motion.div>
 
-                        <div className="overflow-hidden mb-10 pb-4">
+                        <div className="overflow-hidden mb-10 pb-4 pt-10">
                             <motion.h1
-                                initial={{ y: "100%" }}
-                                animate={{ y: 0 }}
-                                transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1], delay: 0.4 }}
-                                className="text-8xl lg:text-[11.5rem] font-black tracking-[-0.04em] leading-[0.8] text-white"
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
+                                className="text-5xl md:text-7xl font-black tracking-[-0.04em] leading-[1.2] text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-cyan-400 uppercase py-10"
                             >
-                                Dream <br />
-                                <div className="flex justify-center flex-wrap gap-x-2">
-                                    {"Kingdom.".split("").map((char, i) => (
-                                        <motion.span
-                                            key={i}
-                                            initial={{ opacity: 0, scale: 0.5, filter: "blur(20px)", y: 50 }}
-                                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)", y: 0 }}
-                                            transition={{ duration: 1, delay: 0.8 + i * 0.08, ease: "easeOut" }}
-                                            className="bg-gradient-to-r from-white via-purple-200 to-cyan-200 bg-clip-text text-transparent drop-shadow-[0_0_80px_rgba(168,85,247,0.4)] hover:text-purple-400 transition-colors duration-500 cursor-default uppercase"
-                                        >
-                                            {char}
-                                        </motion.span>
-                                    ))}
-                                </div>
+                                This is under progress
                             </motion.h1>
                         </div>
-
-                        <motion.p
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            transition={{ delay: 0.5 }}
-                            className="text-slate-400 text-2xl max-w-3xl leading-relaxed font-light tracking-tight mb-16"
-                        >
-                            Where your <span className="text-white font-bold italic">Deepest Thoughts</span> transform into <br />
-                            solid foundations within the <span className="text-purple-400 border-b border-purple-800/50">Celestial Realm.</span>
-                        </motion.p>
-
-                        <motion.button
-                            whileHover={{ scale: 1.05, boxShadow: "0 0 100px rgba(168,85,247,0.5)", letterSpacing: "0.2em" }}
-                            whileTap={{ scale: 0.95 }}
-                            style={{
-                                x: useTransform(mouseXSpring, (x) => (x - window.innerWidth / 2) * 0.05),
-                                y: useTransform(mouseYSpring, (y) => (y - window.innerHeight / 2) * 0.05),
-                            }}
-                            onClick={() => setShowAddModal(true)}
-                            className="bg-white text-black px-24 py-8 rounded-full font-black text-2xl flex items-center gap-5 transition-all tracking-tighter shadow-2xl overflow-hidden group relative"
-                        >
-                            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-purple-100/40 to-transparent -skew-x-12 translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                            <Plus size={36} strokeWidth={4} />
-                            MANIFEST REALITY
-                        </motion.button>
                     </div>
 
-                    {/* Celestial Stats Grid */}
-                    <div className="grid md:grid-cols-3 gap-10 mb-32">
-                        {[
-                            { label: "Materialization Value", val: (totalNeeded / 100000).toFixed(2), unit: "L", color: "from-purple-600/30 border-purple-500/30" },
-                            { label: "Current Density", val: (totalSaved / 100000).toFixed(2), unit: "L", color: "from-cyan-600/20 border-cyan-500/20" },
-                            { label: "Sync Status", val: overallProgress, unit: "%", color: "from-indigo-600/30 border-indigo-500/30" }
-                        ].map((stat, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.6 + i * 0.1 }}
-                                whileHover={{ y: -10, scale: 1.02 }}
-                                className={`glass p-12 rounded-[4rem] border ${stat.color} bg-gradient-to-br to-transparent backdrop-blur-[80px] border-t-white/30 relative overflow-hidden group`}
-                            >
-                                <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-[60px] group-hover:bg-white/10 transition-all" />
-                                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.5em] block mb-6">{stat.label}</span>
-                                <div className="text-6xl font-black flex items-baseline gap-3 text-white tracking-tighter">
-                                    {stat.val}
-                                    <span className="text-2xl text-slate-500 font-bold">{stat.unit}</span>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
 
-                    {/* Daily Nudges / Motivation Section */}
-                    <motion.div
-                        initial={{ opacity: 0, y: 30 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        className="mb-32 p-12 rounded-[4rem] bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10 border border-white/5 backdrop-blur-3xl text-center relative overflow-hidden"
-                    >
-                        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent" />
-                        <Sparkles className="mx-auto mb-6 text-purple-400" size={32} />
-                        <h4 className="text-2xl md:text-3xl font-bold text-white mb-4 tracking-tight italic">
-                            "Every bachat you make brings you one step closer to your destiny."
-                        </h4>
-                        <p className="text-slate-500 text-[10px] uppercase tracking-[0.5em] font-black">Daily Manifestation Nudge</p>
-                    </motion.div>
 
-                    {/* The Dream Islands Grid */}
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-                        <AnimatePresence mode="popLayout">
-                            {dreams.map((dream, index) => (
-                                <DreamCard
-                                    key={dream.id}
-                                    dream={dream}
-                                    index={index}
-                                    totalSaved={totalSaved}
-                                    totalNeeded={totalNeeded}
-                                    calculateProgress={calculateProgress}
-                                    categoryIcons={categoryIcons}
-                                    deleteDream={deleteDream}
-                                    setSelectedDreamForStrategy={setSelectedDreamForStrategy}
-                                />
-                            ))}
-                        </AnimatePresence>
-                    </div>
                 </div>
 
                 {/* --- Modals --- */}
