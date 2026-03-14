@@ -211,14 +211,43 @@ const Navbar = () => {
                     <div className="md:hidden glass absolute top-full left-0 right-0 border-t border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
                         <div className="px-4 py-6 space-y-4 bg-background/95 backdrop-blur-xl text-center">
                             {navItems.map((item) => (
-                                <Link
-                                    key={item.name}
-                                    to={item.path}
-                                    className={`block text-lg font-medium py-2 ${location.pathname === item.path ? (isDreamsPage ? 'text-orange-500' : 'text-primary') : 'text-gray-300'}`}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    {item.name}
-                                </Link>
+                                item.dropdown ? (
+                                    <div key={item.name} className="space-y-2">
+                                        <div className="text-sm font-bold uppercase tracking-widest text-gray-500 py-2">{item.name}</div>
+                                        <div className="flex flex-col gap-2 bg-white/5 rounded-2xl p-4">
+                                            {item.dropdown.map(subItem => (
+                                                subItem.path.startsWith('/#') ? (
+                                                    <a
+                                                        key={subItem.name}
+                                                        href={subItem.path}
+                                                        className="block text-base font-medium py-2 text-gray-300"
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                    >
+                                                        {subItem.name}
+                                                    </a>
+                                                ) : (
+                                                    <Link
+                                                        key={subItem.name}
+                                                        to={subItem.path}
+                                                        className={`block text-base font-medium py-2 ${location.pathname === subItem.path ? (isDreamsPage ? 'text-orange-500' : 'text-primary') : 'text-gray-300'}`}
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                    >
+                                                        {subItem.name}
+                                                    </Link>
+                                                )
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <Link
+                                        key={item.name}
+                                        to={item.path}
+                                        className={`block text-lg font-medium py-2 ${location.pathname === item.path ? (isDreamsPage ? 'text-orange-500' : 'text-primary') : 'text-gray-300'}`}
+                                        onClick={() => setIsMobileMenuOpen(false)}
+                                    >
+                                        {item.name}
+                                    </Link>
+                                )
                             ))}
                             {!user && (
                                 <Link to="/auth" onClick={() => setIsMobileMenuOpen(false)} className={`w-full ${isDreamsPage ? 'bg-orange-500 text-white' : 'bg-primary text-background'} py-4 rounded-xl font-bold flex items-center justify-center gap-2 mt-4`}>
