@@ -86,9 +86,14 @@ const Navbar = () => {
 
     const navItems = [
         { name: 'Home', path: '/' },
-        { name: 'EMI Optimization', path: '/#emi-optimization' },
-        { name: 'Insights', path: '/insights' },
-        { name: 'Calculate Expenses', path: '/calculate-expenses' },
+        {
+            name: 'Financial Tools',
+            dropdown: [
+                { name: 'Calculate Expenses', path: '/calculate-expenses' },
+                { name: 'EMI Optimization', path: '/#emi-optimization' },
+                { name: 'Insights', path: '/insights' }
+            ]
+        },
         { name: 'Cards', path: '/cards' },
         { name: 'Dreams', path: '/dreams' },
     ];
