@@ -35,7 +35,7 @@ const Hero = () => {
                             <Link to="/calculate-expenses" className="bg-primary hover:bg-primary-dark text-background px-8 py-4 rounded-2xl font-bold text-lg transition-all shadow-[0_20px_40px_rgba(255,215,0,0.15)] flex items-center justify-center gap-2">
                                 Start Growing Now <IndianRupee size={20} />
                             </Link>
-                            <button className="glass hover:bg-white/5 px-8 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 border-white/20">
+                            <button onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} className="glass hover:bg-white/5 px-8 py-4 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-2 border-white/20">
                                 How it works
                             </button>
                         </div>
