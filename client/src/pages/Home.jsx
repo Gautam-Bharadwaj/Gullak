@@ -1,5 +1,6 @@
 import React from 'react';
 import Hero from '../components/Hero';
+import HowItWorks from '../components/HowItWorks';
 import ProblemSolution from '../components/ProblemSolution';
 import EmiSimulator from '../components/EmiSimulator';
 import Features from '../components/Features';
@@ -9,6 +10,7 @@ const Home = () => {
     return (
         <>
             <Hero />
+            <HowItWorks />
             <ProblemSolution />
             <EmiSimulator />
             <Features />
