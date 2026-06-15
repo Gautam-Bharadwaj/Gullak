@@ -401,8 +401,8 @@ app.post('/api/ai/card-expert', async (req, res) => {
     }
 
     try {
-        // Using Gemma 3 4B - Ultra-fast 3-series model for instant replies
-        const model = genAI.getGenerativeModel({ model: "gemma-3-4b-it" });
+        // Using Gemini 1.5 Flash model for fast and accurate replies
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
         const historyText = history ? history.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n') : '';
 

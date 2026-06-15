@@ -58,10 +58,15 @@ const CardDemo = () => {
                     history: updatedHistoryWithUser.filter(m => m.role !== 'assistant' || !m.content.includes("Namaste"))
                 })
             });
+            
+            if (!response.ok) {
+                throw new Error(`Server error: ${response.status}`);
+            }
+            
             const data = await response.json();
 
             // Add AI response to history
-            const newAssistantMessage = { role: 'assistant', content: data.reply };
+            const newAssistantMessage = { role: 'assistant', content: data.reply || "No response received from AI." };
             setChatHistory(prev => [...prev, newAssistantMessage]);
         } catch (error) {
             const errorMessage = { role: 'assistant', content: "Sorry, main abhi busy hoon. Thodi der baad try karein! (Check server/API key)" };
